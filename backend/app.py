@@ -7,12 +7,12 @@ import contract
 import json,base64
 from flask_cors import CORS
 import base64
-from PIL import Image, ImageDraw, ImageFont
+# from PIL import Image, ImageDraw, ImageFont
 import datetime
 import mysql.connector
 from mysql.connector import errors
 import qrcode,pickle
-import segno
+# import segno
 import requests,hashlib
 
 ##### GLOBAL CONSTANTS ##########
