@@ -46,6 +46,34 @@ def hashTuple(tup:tuple) -> str:
     hash_hex = hash_object.hexdigest()
     return hash_hex
 
+def get_time_left(date_string):
+    date_string = "2023-09-30 15:30:00"
+    date_format = "%Y-%m-%d %H:%M:%S"
+    date_object = datetime.datetime.strptime(date_string, date_format)
+    current_datetime = datetime.datetime.now()
+    time_difference = date_object - current_datetime
+
+    days, remainder = divmod(time_difference.seconds, 3600*24)
+    hours, remainder = divmod(remainder, 3600)
+    minutes, seconds = divmod(remainder, 60)
+
+    if date_object>current_datetime:
+        if days > 0:
+            remaining_time_str = f"{days} days, {hours} hours, {minutes} minutes, {seconds} seconds"
+        elif hours >0:
+            remaining_time_str = f"{hours} hours, {minutes} minutes, {seconds} seconds"
+        elif minutes>0:
+            remaining_time_str = f"{minutes} minutes, {seconds} seconds"
+        elif seconds>0:
+            remaining_time_str = f"{seconds} seconds"
+        else:
+            remaining_time_str = '-'
+    else:
+        remaining_time_str = '-'
+
+    return remaining_time_str
+
+
 
 
 indexer_client = indexer.IndexerClient(TOKEN,INDEXER_ENDPOINT, HEADERS)
@@ -112,24 +140,25 @@ class User():
                         return False
         return False
     
-    def get_medical_history(self):
+    def get_patient_history(self):
         if self.retrive_local_state()!=None:
             if(self.local_state['role']=='PATIENT'):
-                # q="SELECT * FROM data_log WHERE patient_add='{}' AND current_hash='{}'".format(self.user_add,self.local_state['reserved_local_valuedata_hash'])
                 q="SELECT * FROM data_log WHERE patient_add='{}' ORDER BY id DESC".format(self.user_add)
                 con = mysql.connector.connect(host=DB_HOST , user=DB_USER, password=DB_PASSWORD, database=DB_NAME)
                 cursor = con.cursor(buffered=False, dictionary=True)
                 cursor.execute(q)
                 rows=cursor.fetchall()
                 json=[]
+                i=1
                 for row in rows:
                     jsonrow={}
-                    jsonrow['time_stamp']=row['time_stamp']
-                    jsonrow['doctor_add']=row['doctor_add']
-                    jsonrow['data']=row['data']
+                    jsonrow['snum']=i
+                    jsonrow['past_prescription']=row['data']
+                    jsonrow['addedby']=User(row['doctor_add']).local_state['name']
+                    jsonrow['addedon']=row['time_stamp']
                     jsonrow['attachments']=row['attachments']
-                    jsonrow['doctor_details']=User(row['doctor_add']).local_state
                     json.append(jsonrow)
+                    i+=1
                 return json
         return []
     
@@ -242,9 +271,9 @@ def get_scan_details():
                             if not is_having_emergency:
                                 return json.dumps({"statusCode":200,"data":{"user_add":scan_user.user_add,"is_opted":scan_user.is_opted,"is_having_access":is_having_access,"is_having_emergency":is_having_emergency,"patient_details":scan_user.retrive_local_state()}})
                             else:
-                                return json.dumps({"statusCode":200,"data":{"user_add":scan_user.user_add,"is_opted":scan_user.is_opted,"is_having_access":is_having_access,"is_having_emergency":is_having_emergency,"patient_history":scan_user.get_medical_history(),"patient_details":scan_user.retrive_local_state()}})
+                                return json.dumps({"statusCode":200,"data":{"user_add":scan_user.user_add,"is_opted":scan_user.is_opted,"is_having_access":is_having_access,"is_having_emergency":is_having_emergency,"patient_history":scan_user.get_patient_history(),"patient_details":scan_user.retrive_local_state()}})
                         else:
-                            return json.dumps({"statusCode":200,"data":{"user_add":scan_user.user_add,"is_opted":scan_user.is_opted,"is_having_access":is_having_access,"is_having_emergency":is_having_emergency,"patient_history":scan_user.get_medical_history(),"patient_details":scan_user.retrive_local_state()}})
+                            return json.dumps({"statusCode":200,"data":{"user_add":scan_user.user_add,"is_opted":scan_user.is_opted,"is_having_access":is_having_access,"is_having_emergency":is_having_emergency,"patient_history":scan_user.get_patient_history(),"patient_details":scan_user.retrive_local_state()}})
                     else:
                         return json.dumps({"statusCode":403,"notify":"Can't Access Doctor Profile.!!"})
                 else:
@@ -268,11 +297,103 @@ def get_scan_details():
                         else:
                             return json.dumps({"statusCode":200,"data":{"user_add":scan_user.user_add,"is_opted":scan_user.is_opted,"is_having_access":is_having_access,"is_having_emergency_access":is_having_emergency,"doctor_records":scan_user.get_doctor_history(user.user_add),"doctor_details":scan_user.retrive_local_state()}})
                     else:
-                        return json.dumps({"statusCode":403,"notify":"Can't Access Doctor Profile.!!"})
+                        return json.dumps({"statusCode":403,"notify":"Can't Access Patient Profile.!!"})
             else:
                 return json.dumps({"statusCode":302,"href":"/login","notify":"Login To Continue.!!"})      
         else:
             return json.dumps({"statusCode":302,"href":"/login","notify":"Login To Continue.!!"})
+        
+@app.route('/get_doctor_past',methods=['GET'])
+def get_doctor_past():
+    if(session.get('user')):
+        user=pickle.loads(session.get('user'))
+
+        
+    else:
+        return json.dumps({"statusCode":302,"href":"/login","notify":"Login To Continue.!!"})
+    
+
+@app.route('/doctor_access',methods=['GET'])
+def doctor_access():
+    if(session.get('user')):
+        doctor=pickle.loads(session.get("user"))
+        con = mysql.connector.connect(host=DB_HOST , user=DB_USER, password=DB_PASSWORD, database=DB_NAME)
+        cursor = con.cursor(buffered=False, dictionary=True)
+        date = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        json_data = []
+        i=1
+
+        q="SELECT * FROM request_log WHERE doctor_add='{}' ORDER BY id DESC".format(doctor.user_add)
+        cursor.execute(q)
+        rows=cursor.fetchall()
+        for row in rows:
+            patient = User(row['patient_add'])
+            js={}
+            js['sno']=i
+            js['patient_name']=patient.local_state['name']
+            js['patient_dob']=patient.local_state['DOB']
+            js['access_type']= 'GENERAL' if row['request_type']==1 else 'EMERGENCY'
+            js['access_endson']=get_time_left(row['time_stamp'])
+            if (js['access_type']!='EMERGENCY'):
+                q="SELECT * FROM access_log WHERE doctor_add='{}' AND request_hash='{}'".format(doctor.user_add,row['current_hash'])
+                cursor.execute()
+                r=cursor.fetchall()
+                if(len(r)>0):
+                    q1="SELECT * FROM data_log WHERE doctor_add='{}' AND access_hash='{}'".format(doctor.user_add,r[0]['current_hash'])
+                    cursor.execute()
+                    r1=cursor.fetchall()
+                    if(len(r1)>0):
+                        js['request_access']='completed'
+                        js['access_endson']='-'
+                    else:
+                        if r[0]['access_status']==0:
+                            js['request_access']='rejected'
+                            js['access_endson']='-'
+                        elif r[0]['access_status']==1 and get_time_left(r[0]['time_stamp'])!='-':
+                            js['request_access']='active'
+                            js['access_endson']=get_time_left(r[0]['time_stamp'])
+                        else:
+                            js['request_access']='expired'
+                            js['access_endson']='-'
+                else:
+                    js['request_access']='pending'
+                    js['access_endson']='-'
+            else:
+                q="SELECT * FROM access_log WHERE doctor_add='{}' AND request_hash='{}'".format(doctor.user_add,row['current_hash'])
+                cursor.execute()
+                r=cursor.fetchall()
+                if(len(r)>0):
+                    q1="SELECT * FROM data_log WHERE doctor_add='{}' AND access_hash='{}'".format(doctor.user_add,r[0]['current_hash'])
+                    cursor.execute()
+                    r1=cursor.fetchall()
+                    if(len(r1)>0):
+                        js['request_access']='completed'
+                        js['access_endson']='-'
+                    else:
+                        if r[0]['access_status']==0:
+                            js['request_access']='rejected'
+                            js['access_endson']='-'
+                        elif r[0]['access_status']==1 and get_time_left(r[0]['time_stamp'])!='-':
+                            js['request_access']='active'
+                            js['access_endson']=get_time_left(r[0]['time_stamp'])
+                        else:
+                            js['request_access']='expired'
+                            js['access_endson']='-'
+                elif get_time_left(row['time_stamp'])!='-':
+                    js['request_access']='active'
+                    js['access_endson']=get_time_left(r[0]['time_stamp'])
+                else:
+                    js['request_access']='expired'
+            if js['request_access']=='active':
+                js['patient_history']=patient.get_patient_history()
+            else:
+                js['patient_history']=[]
+            i+=1
+            json_data.append(js)
+        return json.dumps({"statusCode":200,"data":json_data})
+    else:
+        return json.dumps({"statusCode":302,"href":"/login","notify":"Login To Continue.!!"})
+
 
 @app.route('/logout',methods=['GET'])
 def logout():
