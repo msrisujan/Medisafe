@@ -70,8 +70,8 @@ class User():
         return False
     
     def get_qr_code(self):
-        qrcode = segno.make("{}profile_qr?add={}".format(DEPLOYED_URL,self.user_add))
-        return qrcode.svg_data_uri(dark='#01fe34',light="#000000",scale=4)
+        qrcode = "{}profile_qr?add={}".format(DEPLOYED_URL,self.user_add)
+        return qrcode
     
     def retrive_local_state(self)-> None:
         if(self.is_opted):
