@@ -1,38 +1,57 @@
 import React, { useState } from 'react';
 import '../DoctorDetails.css';
 
-const DoctorDetails = () => {
+const DoctorAccess = () => {
   const [selectedRow, setSelectedRow] = useState(null);
-  const data = [
-    // Replace this with your data for 10 rows
-    {
-      date: 'Date 1',
-      hospitalName: 'Hospital 1',
-      problem: 'Problem 1',
-      doctorName: 'Doctor 1',
-      doctordetails: {
-        name: 'Dr. John Doe',
-        age: 35,
-        qualification: 'MD, Cardiology',
-        experience: '10 years',
-        rating: 4.5,
-      },
-    },
-    {
-      date: 'Date 2',
-      hospitalName: 'Hospital 2',
-      problem: 'Problem 2',
-      doctorName: 'Doctor 2',
-      doctordetails: {
-        name: 'Dr. Jane Smith',
-        age: 40,
-        qualification: 'MD, Pediatrics',
-        experience: '12 years',
-        rating: 4.8,
-      },
-    },
-    // Add more rows here
-  ];
+  const [data, setData] = useState([]);
+  useEffect(() => {
+    // when page loads for the first time send a request to the server to get the data
+    async function sendRequest() {
+      try {
+        const response = await fetch("http://localhost:5000/doctor_access", {
+          method: "GET",
+        });
+        const responseData = await response.json();
+        if (responseData.statusCode === 200) {
+          setData(responseData.data);
+        }
+        else{
+          <Navigate to="/" />
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    }
+    sendRequest();
+  }
+  , []);
+
+  async function submitData(patient_add,access_hash){
+    var text = document.getElementById("textarea").value;
+    if(text.length < 1){
+      alert("Please enter some data");
+      return;
+    }
+    const response = await fetch("http://localhost:5000/send_data", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          patient_add: patient_add,
+          access_hash: access_hash,
+          data: text,
+        }),
+      });
+      const responseData = await response.json();
+      if(responseData.statusCode === 200){
+        alert("Data submitted successfully");
+        window.location.reload();
+      }
+      else{
+        alert("Some error occured");
+      }
+  }
 
   const handleRowClick = (index) => {
     setSelectedRow(index);
@@ -61,16 +80,25 @@ const DoctorDetails = () => {
           <thead>
             <tr>
               <th>SNum</th>
-              <th>Date</th>
-              <th>Doctor Name</th>
+              <th>Patient Name</th>
+              <th>Patient DOB</th>
+              <th>Access Type</th>
+              <th>Access Ends In</th>
+              <th>Request Status</th>
             </tr>
           </thead>
           <tbody>
             {data.map((row, index) => (
-              <tr className='table-row' key={index} onClick={() => handleRowClick(index)}>
+              <tr className='table-row' key={index} onClick={() => {
+              if(row.request_status === "active"){
+                handleRowClick(index)
+              }}}>
                 <td>{row.snum}</td>
-                <td>{row.date}</td>
-                <td>{row.doctorname}</td>
+                <td>{row.patient_name}</td>
+                <td>{row.patient_dob}</td>
+                <td>{row.access_type}</td>
+                <td>{row.access_endsin}</td>
+                <td>{row.request_status}</td>
               </tr>
             ))}
           </tbody>
@@ -79,7 +107,8 @@ const DoctorDetails = () => {
       );
     } else {
       const selectedData = data[selectedRow];
-      const doctordetails = selectedData.doctordetails;
+      const doctorDetails = selectedData.doctorDetails;
+
       return (
         <div className={`doctor-details ${blur_class}`}>
           <div className='hide table'>
@@ -99,9 +128,11 @@ const DoctorDetails = () => {
             </div>
             <div className='details'>
             <h2>Row Details</h2>
-            <h4>Prescription</h4>
-            <p>selectedRow.patient_prescription</p>
-            <a href={`${selectedRow.patient_attachments}`}>Attachments</a>
+            <p>SNum: {selectedData.snum}</p>
+            <p>Patient Name: {selectedData.patient_name}</p>
+            <p>Patient DOB: {selectedData.patient_dob}</p>
+            <p>Access Type: {selectedData.access_type}</p>
+            <p>Access Ends In: {selectedData.access_endsin}</p>
             <button onClick={handleBackClick} className="back-button button">
               Back to Table
             </button>
@@ -120,18 +151,51 @@ const DoctorDetails = () => {
                 </div>
               </div>
             <div className='details'>
-            <h2>Doctor Details</h2>
-            <p>Name: {doctordetails.name}</p>
-            <p>Qualification: {doctordetails.qualification}</p>
-            <p>Specialisation: {doctordetails.specialisation}</p>
-            <p>Experience: {doctordetails.experience}</p>
-            <p>Rating: {doctordetails.rating}</p>
-            <button>Rate</button>
+              <h2>Doctor Details</h2>
+              <textarea name="data" id="textarea" cols="30" rows="10"></textarea>
+              <input type="file" />
+              <button onClick={submitData(selectedData.patient_add,selectedData.access_hash)}>Submit</button>
             </div>
           </div>
+          <div className={`tablecard ${blur_class}`}>
+           <div class="tools">
+            <div class="circle">
+              <span class="red box"></span>
+            </div>
+            <div class="circle">
+              <span class="yellow box"></span>
+            </div>
+            <div class="circle">
+              <span class="green box"></span>
+            </div>
+          </div>
+        <table className="table content-table">
+          <thead>
+            <tr>
+              <th>SNum</th>
+              <th>Past Prescription</th>
+              <th>Added By</th>
+              <th>Added On</th>
+              <th>Attachments</th>
+            </tr>
+          </thead>
+          <tbody>
+            {selectedData.patient_history.map((row, index) => (
+              <tr className='table-row' key={index}>
+                <td>{row.snum}</td>
+                <td>{row.past_prescription}</td>
+                <td>{row.addedby}</td>
+                <td>{row.addedon}</td>
+                <td>{row.attachments}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        </div>
         </div>
       );
     }
+  
   };
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isBlurred, setIsBlurred] = useState(false);
@@ -183,4 +247,4 @@ const DoctorDetails = () => {
   );
 };
 
-export default DoctorDetails;
+export default DoctorAccess;

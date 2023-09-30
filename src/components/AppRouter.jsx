@@ -1,7 +1,7 @@
 // AppRouter.jsx
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import { useEffect, useRef,useState } from 'react';
+import { useEffect,useState } from 'react';
 import {PeraWalletConnect} from "@perawallet/connect"
 import Home from './Home.jsx';
 import Signup from './Signup.jsx';
@@ -99,7 +99,7 @@ const [accountAddress, setAccountAddress] = useState(null);
               <Route path="/signup" element={<Signup peraWallet={peraWallet} accountAddress={accountAddress} />} />
               <Route path="/doctorprofile" element={<NavbarProfile />} />
               <Route path="/patientprofile" element={<NavbarProfile />} />
-              <Route path="/profile_qr" element={<ScanQR />} />
+              <Route path="/profile_qr" element={<ScanQR accountAddress={accountAddress} />} />
           </Routes>
         </Router>
   );
