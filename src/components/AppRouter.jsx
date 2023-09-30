@@ -6,6 +6,7 @@ import {PeraWalletConnect} from "@perawallet/connect"
 import Home from './Home.jsx';
 import Signup from './Signup.jsx';
 import NavbarProfile from './NavbarProfile.jsx';
+import ScanQR from './ScanQR.jsx';
 
 const AppRouter = () => {
   const peraWallet = new PeraWalletConnect({
@@ -98,6 +99,7 @@ const [accountAddress, setAccountAddress] = useState(null);
               <Route path="/signup" element={<Signup peraWallet={peraWallet} accountAddress={accountAddress} />} />
               <Route path="/doctorprofile" element={<NavbarProfile />} />
               <Route path="/patientprofile" element={<NavbarProfile />} />
+              <Route path="/profile_qr" element={<ScanQR />} />
           </Routes>
         </Router>
   );

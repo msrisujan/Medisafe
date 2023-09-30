@@ -42,6 +42,7 @@ const NavbarProfile = ({ userName }) => {
         <button>Recent reports</button>
         <button>Add extra data</button>
         <button>Edit contacts</button>
+        <Link to="/profile_qr">QR Scan</Link>
         <hr />
         <button>Logout</button>
         <div className="social-icons">
