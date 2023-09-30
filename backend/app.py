@@ -70,7 +70,7 @@ class User():
         return False
     
     def get_qr_code(self):
-        qrcode = segno.make("{}profile?add={}".format(DEPLOYED_URL,self.user_add))
+        qrcode = segno.make("{}profile_qr?add={}".format(DEPLOYED_URL,self.user_add))
         return qrcode.svg_data_uri(dark='#01fe34',light="#000000",scale=4)
     
     def retrive_local_state(self)-> None:
@@ -116,6 +116,7 @@ class User():
     def get_request_log(self):
         if self.retrive_local_state()!=None:
             if(self.local_state['role']=='DOCTOR'):
+                pass
                 
                     
 
