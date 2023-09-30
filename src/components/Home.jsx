@@ -1,13 +1,18 @@
 import React from 'react';
-import {Link } from 'react-router-dom';
-import { useEffect, useRef } from 'react';
+// import {Link } from 'react-router-dom';
+import { useEffect, useRef,useState } from 'react';
 import webGLFluidEnhanced from 'webgl-fluid-enhanced';
 import { useScramble } from 'use-scramble';
+import { Navigate } from 'react-router-dom';
 import '../App.css';
 
 
-function App() {
+function App({loggedIn,isDoctor,isPatient,isConnectedToPeraWallet,handleConnectWalletClick,handleDisconnectWalletClick}) {
   const canvasRef = useRef(null);
+
+
+
+
 
   useEffect(() => {
     webGLFluidEnhanced.simulation(canvasRef.current, {
@@ -73,11 +78,9 @@ function App() {
   });
 
   
-
-
-  
   return (
     <div className="App">
+       
       {/* Navbar */}
       <section id="bg">
       <canvas ref={canvasRef} style={{ width: '100%', height: '100%', position: 'fixed',left: '0', top: '0' }} />
@@ -87,10 +90,27 @@ function App() {
           <span className="navbar-text">Medisafe</span>
         </div>
         <div className="navbar-right">
-        <Link to="/signup" className="navbar-button">Signup</Link>
-        <button className="navbar-button">Login</button>
+        <button
+          onClick={
+            isConnectedToPeraWallet ? handleDisconnectWalletClick : handleConnectWalletClick
+          } className='navbar-button'>
+          {isConnectedToPeraWallet ? "Disconnect" : "Connect to Pera Wallet"}
+        </button>
         </div>
       </nav>
+
+      
+
+      {
+        loggedIn ? <Navigate to="/signup" /> : null
+      }
+      {
+        isDoctor ? <Navigate to="/doctorprofile" /> : null
+      }
+      {
+        isPatient ? <Navigate to="/patientprofile" /> : null
+      }
+     
 
       <section className="animated-section">
       <div className="background-image"></div>
