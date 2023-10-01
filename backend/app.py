@@ -47,17 +47,16 @@ def hashTuple(tup:tuple) -> str:
     return hash_hex
 
 def get_time_left(date_string):
-    date_string = "2023-09-30 15:30:00"
-    date_format = "%Y-%m-%d %H:%M:%S"
-    date_object = datetime.datetime.strptime(date_string, date_format)
+    # date_format = "%Y-%m-%d %H:%M:%S"
+    # date_object = datetime.datetime.strptime(date_string, date_format)
     current_datetime = datetime.datetime.now()
-    time_difference = date_object - current_datetime
+    time_difference = (date_string + datetime.timedelta(days=1)) - current_datetime
 
     days, remainder = divmod(time_difference.seconds, 3600*24)
     hours, remainder = divmod(remainder, 3600)
     minutes, seconds = divmod(remainder, 60)
 
-    if date_object>current_datetime:
+    if (date_string + datetime.timedelta(days=1))>current_datetime:
         if days > 0:
             remaining_time_str = f"{days} days, {hours} hours, {minutes} minutes, {seconds} seconds"
         elif hours >0:
@@ -307,7 +306,7 @@ def get_scan_details():
                                 rows = cursor.fetchall()
                                 if(len(rows)>0):
                                     row=rows[0]
-                                    check="SELECT * FROM access_log WHERE patient_add='{}' AND doctor_add='{}' AND request_has='{}'".format(row['patient_add'],row['doctor_add'],row['current_hash'])
+                                    check="SELECT * FROM access_log WHERE patient_add='{}' AND doctor_add='{}' AND request_hash='{}'".format(row['patient_add'],row['doctor_add'],row['current_hash'])
                                     cursor.execute(check)
                                     checkss=cursor.fetchall()
                                     if(len(checkss)==0):
@@ -402,23 +401,25 @@ def doctor_access():
         i=1
 
         q="SELECT * FROM request_log WHERE doctor_add='{}' ORDER BY id DESC".format(doctor.user_add)
+        print(q)
         cursor.execute(q)
         rows=cursor.fetchall()
         for row in rows:
             patient = User(row['patient_add'])
             js={}
             js['sno']=i
+            js['patient_add']=row['patient_add']
             js['patient_name']=patient.local_state['name']
             js['patient_dob']=patient.local_state['DOB']
             js['access_type']= 'GENERAL' if row['request_type']==1 else 'EMERGENCY'
             js['access_endson']=get_time_left(row['time_stamp'])
             if (js['access_type']!='EMERGENCY'):
                 q="SELECT * FROM access_log WHERE doctor_add='{}' AND request_hash='{}'".format(doctor.user_add,row['current_hash'])
-                cursor.execute()
+                cursor.execute(q)
                 r=cursor.fetchall()
                 if(len(r)>0):
                     q1="SELECT * FROM data_log WHERE doctor_add='{}' AND access_hash='{}'".format(doctor.user_add,r[0]['current_hash'])
-                    cursor.execute()
+                    cursor.execute(q1)
                     r1=cursor.fetchall()
                     if(len(r1)>0):
                         js['request_access']='completed'
@@ -429,8 +430,10 @@ def doctor_access():
                             js['access_endson']='-'
                         elif r[0]['access_status']==1 and get_time_left(r[0]['time_stamp'])!='-':
                             js['request_access']='active'
+                            js['access_hash']=r[0]['current_hash']
                             js['access_endson']=get_time_left(r[0]['time_stamp'])
                         else:
+                            print(r[0]['time_stamp'])
                             js['request_access']='expired'
                             js['access_endson']='-'
                 else:
@@ -438,11 +441,11 @@ def doctor_access():
                     js['access_endson']='-'
             else:
                 q="SELECT * FROM access_log WHERE doctor_add='{}' AND request_hash='{}'".format(doctor.user_add,row['current_hash'])
-                cursor.execute()
+                cursor.execute(q)
                 r=cursor.fetchall()
                 if(len(r)>0):
                     q1="SELECT * FROM data_log WHERE doctor_add='{}' AND access_hash='{}'".format(doctor.user_add,r[0]['current_hash'])
-                    cursor.execute()
+                    cursor.execute(q1)
                     r1=cursor.fetchall()
                     if(len(r1)>0):
                         js['request_access']='completed'
@@ -463,6 +466,7 @@ def doctor_access():
                 else:
                     js['request_access']='expired'
                     js['access_endson']='-'
+            print(js)
             if js['request_access']=='active':
                 js['patient_history']=patient.get_patient_history()
             else:
@@ -484,18 +488,19 @@ def send_data():
             access_hash=request.json['access_hash']
             data=request.json['data']
             date=datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            q="SELECT * FROM access_log WHERE patient_add='{}' AND access_hash='{}' AND doctor_add='{}'".format(patient_add,access_hash,doctor.user_add)
+            q="SELECT * FROM access_log WHERE patient_add='{}' AND current_hash='{}' AND doctor_add='{}' AND access_status=1 AND ADDDATE(time_stamp,INTERVAL 1 DAY)>'{}'".format(patient_add,access_hash,doctor.user_add,date)
             cursor.execute(q)
             rows=cursor.fetchall()
             if len(rows)>0:
                 row=rows[0]
                 patient = User(patient_add)
-                q="INSERT INTO data_log (`patient_add`,`doctor_add`,`time_stamp`,`data`,`attachments`,`access_hash`,`previous_hash`) VALUES('{}','{}','{}','{}','{}','{}','{}')".format(patient_add,doctor.user_add,date,'',access_hash,patient.local_state['reserved_local_valuedata_hash'])
+                q="INSERT INTO data_log (`patient_add`,`doctor_add`,`time_stamp`,`data`,`attachments`,`access_hash`,`previous_hash`) VALUES('{}','{}','{}','{}','{}','{}','{}')".format(patient_add,doctor.user_add,date,data,"",access_hash,patient.local_state['reserved_local_valuedata_hash'])
                 try:
                     cursor.execute(q)
                     con.commit()
                     return json.dumps({"statusCode":200})
                 except errors.IntegrityError as e:
+                    print(e)
                     return json.dumps({"statusCode":403,"notify":"Query Failed"})
             else:
                 return json.dumps({"statusCode":403,"notify":"Malfunctioned Data"})

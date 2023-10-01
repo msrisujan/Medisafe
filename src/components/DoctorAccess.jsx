@@ -1,8 +1,8 @@
 import React, { useState,useEffect } from 'react';
-import { Navigate } from 'react-router-dom';
+import { Navigate,Link } from 'react-router-dom';
 import '../DoctorDetails.css';
 
-const DoctorAccess = ({restapi}) => {
+const DoctorAccess = ({restapi,handleDisconnectWalletClick}) => {
   const [selectedRow, setSelectedRow] = useState(null);
   const [data, setData] = useState([]);
   useEffect(() => {
@@ -26,24 +26,24 @@ const DoctorAccess = ({restapi}) => {
   }
   , []);
 
-  async function submitData(patient_add,access_hash){
-    var text = document.getElementById("textarea").value;
+  async function submitData(){
+    if(document.getElementById("area")){
+      let patient_add = data[selectedRow]['patient_add'];
+      let access_hash = data[selectedRow]['access_hash'];
+    let text = document.getElementById("area").value;
     if(text.length < 1){
       alert("Please enter some data");
       return;
     }
-    const response = await fetch("http://localhost:5000/send_data", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
+    const response = await restapi.post("/send_data",JSON.stringify({
           patient_add: patient_add,
           access_hash: access_hash,
           data: text,
-        }),
-      });
-      const responseData = await response.json();
+        }),{headers: {
+          "Content-Type": "application/json",
+        }
+    });
+      const responseData =  response.data;
       if(responseData.statusCode === 200){
         alert("Data submitted successfully");
         window.location.reload();
@@ -54,10 +54,14 @@ const DoctorAccess = ({restapi}) => {
       else{
         alert("Some error occured");
       }
+    }
+    
   }
 
   const handleRowClick = (index) => {
+    if(data[index].request_access==='active'){
     setSelectedRow(index);
+    }
   };
 
   const handleBackClick = () => {
@@ -92,16 +96,16 @@ const DoctorAccess = ({restapi}) => {
           </thead>
           <tbody>
             {data.map((row, index) => (
+                              
               <tr className='table-row' key={index} onClick={() => {
-              if(row.request_status === "active"){
-                handleRowClick(index)
-              }}}>
-                <td>{row.snum}</td>
+                handleRowClick(index);
+              }}>
+                <td>{row.sno}</td>
                 <td>{row.patient_name}</td>
                 <td>{row.patient_dob}</td>
                 <td>{row.access_type}</td>
-                <td>{row.access_endsin}</td>
-                <td>{row.request_status}</td>
+                <td>{row.access_endson}</td>
+                <td>{row.request_access}</td>
               </tr>
             ))}
           </tbody>
@@ -113,6 +117,7 @@ const DoctorAccess = ({restapi}) => {
       const doctorDetails = selectedData.doctorDetails;
 
       return (
+        <div>
         <div className={`doctor-details ${blur_class}`}>
           <div className='hide table'>
 
@@ -131,11 +136,11 @@ const DoctorAccess = ({restapi}) => {
             </div>
             <div className='details'>
             <h2>Row Details</h2>
-            <p>SNum: {selectedData.snum}</p>
+            <p>SNum: {selectedData.sno}</p>
             <p>Patient Name: {selectedData.patient_name}</p>
             <p>Patient DOB: {selectedData.patient_dob}</p>
             <p>Access Type: {selectedData.access_type}</p>
-            <p>Access Ends In: {selectedData.access_endsin}</p>
+            <p>Access Ends In: {selectedData.access_endson}</p>
             <button onClick={handleBackClick} className="back-button button">
               Back to Table
             </button>
@@ -155,12 +160,14 @@ const DoctorAccess = ({restapi}) => {
               </div>
             <div className='details'>
               <h2>Doctor Details</h2>
-              <textarea name="data" id="textarea" cols="30" rows="10"></textarea>
+              <textarea name="data" id="area" cols="30" rows="10"></textarea>
               <input type="file" />
-              <button onClick={submitData(selectedData.patient_add,selectedData.access_hash)}>Submit</button>
+              <button onClick={submitData}>Submit</button>
             </div>
           </div>
-          <div className={`tablecard ${blur_class}`}>
+        </div>
+        <div className={`doctor-details ${blur_class}`}>
+        <div style={{width:`100%`}} className={`tablecard ${blur_class}`}>
            <div class="tools">
             <div class="circle">
               <span class="red box"></span>
@@ -196,6 +203,8 @@ const DoctorAccess = ({restapi}) => {
         </table>
         </div>
         </div>
+        </div>
+
       );
     }
   
@@ -233,13 +242,11 @@ const DoctorAccess = ({restapi}) => {
       {renderTable()}
     </div>
       
-      <div className={`dropdown-menu ${isMenuOpen ? 'open' : ''}`}>
-        <button>Doctors dealed</button>
-        <button>Recent reports</button>
-        <button>Add extra data</button>
-        <button>Edit contacts</button>
+    <div className={`dropdown-menu ${isMenuOpen ? 'open' : ''}`}>
+        <Link to="/doctor_access">Patients dealed</Link>        
+        <Link to="/profile_qr">QR Scan</Link>
         <hr />
-        <button>Logout</button>
+        <button onClick={handleDisconnectWalletClick}>Logout</button>
         <div className="social-icons">
           <i className="fab fa-facebook"></i>
           <i className="fab fa-twitter"></i>

@@ -1,58 +1,58 @@
 import React from 'react';
 // import {Link } from 'react-router-dom';
 import { useEffect, useRef } from 'react';
-import webGLFluidEnhanced from 'webgl-fluid-enhanced';
+// import webGLFluidEnhanced from 'webgl-fluid-enhanced';
 import { useScramble } from 'use-scramble';
 import { Navigate } from 'react-router-dom';
 import '../App.css';
 
 
 function App({loggedIn,isDoctor,isPatient,isConnectedToPeraWallet,handleConnectWalletClick,handleDisconnectWalletClick}) {
-  const canvasRef = useRef(null);
+  // const canvasRef = useRef(null);
 
 
 
 
 
-  useEffect(() => {
-    webGLFluidEnhanced.simulation(canvasRef.current, {
-      SIM_RESOLUTION: 128, // Resolution of the simulation grid
-  DYE_RESOLUTION: 1024, // Resolution of the dye grid
-  CAPTURE_RESOLUTION: 512, // Resolution of captured frames
-  DENSITY_DISSIPATION: 1, // Rate at which density dissipates
-  VELOCITY_DISSIPATION: 0.5, // Rate at which velocity dissipates
-  PRESSURE: 0.1, // Pressure value used in the simulation
-  PRESSURE_ITERATIONS: 20, // Number of pressure iterations
-  CURL: 2, // Curl value used in the simulation
-  INITIAL: false, // Enables splats on initial load
-  SPLAT_AMOUNT: 2, // Number of initial splats (Random number between n and n * 5)
-  SPLAT_RADIUS: 0.05, // Radius of the splats
-  SPLAT_FORCE: 6000, // Force applied by the splats
-  SPLAT_KEY: '', // Keyboard key to spawn new splats (empty to disable)
-  SHADING: true, // Enables shading in the visualization
-  COLORFUL: true, // Enables rapid changing of colors
-  COLOR_UPDATE_SPEED: 10, // Speed of color update
-  // COLOR_PALETTE: [], // Custom color palette (empty by default, uses hex colors)
-  HOVER: true, // Enables interaction on hover
-  TRANSPARENT: false, // Makes the canvas transparent if true
-  BRIGHTNESS: 0.3, // Color brightness (Recommend lower than 1.0 if BLOOM is true)
-  BLOOM: false, // Enables bloom effect
-  BLOOM_ITERATIONS: 8, // Number of bloom effect iterations
-  BLOOM_RESOLUTION: 256, // Resolution of the bloom effect
-  BLOOM_INTENSITY: 0.8, // Intensity of the bloom effect
-  BLOOM_THRESHOLD: 0.6, // Threshold for the bloom effect
-  BLOOM_SOFT_KNEE: 0.7, // Soft knee value for the bloom effect
-  SUNRAYS: true, // Enables sunrays effect
-  SUNRAYS_RESOLUTION: 196, // Resolution of the sunrays effect
-  SUNRAYS_WEIGHT: 1, // Weight of the sunrays effect
-  COLOR_PALETTE: ['#12C0CF','#16D9EB','#33DEED','#50E3F0','#6EE7F2', '#8BECF5', '#A8F1F7']
+  // useEffect(() => {
+  //   webGLFluidEnhanced.simulation(canvasRef.current, {
+  //     SIM_RESOLUTION: 128, // Resolution of the simulation grid
+  // DYE_RESOLUTION: 1024, // Resolution of the dye grid
+  // CAPTURE_RESOLUTION: 512, // Resolution of captured frames
+  // DENSITY_DISSIPATION: 1, // Rate at which density dissipates
+  // VELOCITY_DISSIPATION: 0.5, // Rate at which velocity dissipates
+  // PRESSURE: 0.1, // Pressure value used in the simulation
+  // PRESSURE_ITERATIONS: 20, // Number of pressure iterations
+  // CURL: 2, // Curl value used in the simulation
+  // INITIAL: false, // Enables splats on initial load
+  // SPLAT_AMOUNT: 2, // Number of initial splats (Random number between n and n * 5)
+  // SPLAT_RADIUS: 0.05, // Radius of the splats
+  // SPLAT_FORCE: 6000, // Force applied by the splats
+  // SPLAT_KEY: '', // Keyboard key to spawn new splats (empty to disable)
+  // SHADING: true, // Enables shading in the visualization
+  // COLORFUL: true, // Enables rapid changing of colors
+  // COLOR_UPDATE_SPEED: 10, // Speed of color update
+  // // COLOR_PALETTE: [], // Custom color palette (empty by default, uses hex colors)
+  // HOVER: true, // Enables interaction on hover
+  // TRANSPARENT: false, // Makes the canvas transparent if true
+  // BRIGHTNESS: 0.3, // Color brightness (Recommend lower than 1.0 if BLOOM is true)
+  // BLOOM: false, // Enables bloom effect
+  // BLOOM_ITERATIONS: 8, // Number of bloom effect iterations
+  // BLOOM_RESOLUTION: 256, // Resolution of the bloom effect
+  // BLOOM_INTENSITY: 0.8, // Intensity of the bloom effect
+  // BLOOM_THRESHOLD: 0.6, // Threshold for the bloom effect
+  // BLOOM_SOFT_KNEE: 0.7, // Soft knee value for the bloom effect
+  // SUNRAYS: true, // Enables sunrays effect
+  // SUNRAYS_RESOLUTION: 196, // Resolution of the sunrays effect
+  // SUNRAYS_WEIGHT: 1, // Weight of the sunrays effect
+  // COLOR_PALETTE: ['#12C0CF','#16D9EB','#33DEED','#50E3F0','#6EE7F2', '#8BECF5', '#A8F1F7']
 
-    });
-  }, []); 
+  //   });
+  // }, []); 
 
 
-  const { ref:refright } = useScramble({
-    text: "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.",
+  const { ref:refright1 } = useScramble({
+    text: "In the fast-paced world of healthcare, accessing vital information can mean the difference between life and loss. MEDISAFE is here to bridge the gaps, revolutionizing how you manage and share your medical records.",
     range: [65,125],
     speed: 1,
     tick: 1,
@@ -64,8 +64,86 @@ function App({loggedIn,isDoctor,isPatient,isConnectedToPeraWallet,handleConnectW
     overflow: false,
   });
 
-  const { ref:refleft } = useScramble({
-    text: "Lorem Ipsum is sim dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.",
+  const { ref:refleft1 } = useScramble({
+    text: "Say goodbye to fragmented medical care. With MEDISAFE, you're in control. Our blockchain-powered network ensures your data is secure, accessible, and in your hands.",
+    range: [65,125],
+    speed: 1,
+    tick: 1,
+    step: 5,
+    scramble: 5,
+    seed: 2,
+    chance: 1,
+    overdrive: false,
+    overflow: false,
+  });
+
+  const { ref:refright2 } = useScramble({
+    text: "Every document shared on our network comes from verified hospitals, guaranteeing authenticity and eliminating data leaks.",
+    range: [65,125],
+    speed: 1,
+    tick: 1,
+    step: 5,
+    scramble: 5,
+    seed: 2,
+    chance: 1,
+    overdrive: false,
+    overflow: false,
+  });
+
+  const { ref:refleft2 } = useScramble({
+    text: "Your security is our priority. Advanced biometric scans ensure that only you control who accesses your records, even in critical situations. ",
+    range: [65,125],
+    speed: 1,
+    tick: 1,
+    step: 5,
+    scramble: 5,
+    seed: 2,
+    chance: 1,
+    overdrive: false,
+    overflow: false,
+  });
+
+  const { ref:refright3 } = useScramble({
+    text: " Describe your symptoms, and let MEDISAFE's AI-powered engine provide you with immediate, accurate medical advice from trusted doctors.",
+    range: [65,125],
+    speed: 1,
+    tick: 1,
+    step: 5,
+    scramble: 5,
+    seed: 2,
+    chance: 1,
+    overdrive: false,
+    overflow: false,
+  });
+
+  const { ref:refleft3 } = useScramble({
+    text: "Tailored insurance suggestions to meet your unique needs, ensuring you're covered when it matters most. ",
+    range: [65,125],
+    speed: 1,
+    tick: 1,
+    step: 5,
+    scramble: 5,
+    seed: 2,
+    chance: 1,
+    overdrive: false,
+    overflow: false,
+  });
+
+  const { ref:refright4 } = useScramble({
+    text: " Receive push notifications for appointments, and make payments directly through the app, streamlining your healthcare experience. ",
+    range: [65,125],
+    speed: 1,
+    tick: 1,
+    step: 5,
+    scramble: 5,
+    seed: 2,
+    chance: 1,
+    overdrive: false,
+    overflow: false,
+  });
+
+  const { ref:refleft4 } = useScramble({
+    text: " As we look ahead, MEDISAFE's vision extends beyond efficient record management. Through user authorization, we're poised to become a trusted medical entity in our own right, providing solutions that are secure, seamless, and innovative.  ",
     range: [65,125],
     speed: 1,
     tick: 1,
@@ -83,10 +161,10 @@ function App({loggedIn,isDoctor,isPatient,isConnectedToPeraWallet,handleConnectW
        
       {/* Navbar */}
       <section id="bg">
-      <canvas ref={canvasRef} style={{ width: '100%', height: '100%', position: 'fixed',left: '0', top: '0' }} />
+      {/* <canvas ref={canvasRef} style={{ width: '100%', height: '100%', position: 'fixed',left: '0', top: '0' }} /> */}
       <nav className="navbar">
         <div className="navbar-left">
-          <img src="logo.png" alt="Logo" className="logo" />
+          <img src="MEDISAFE.jpg" alt="Logo" className="logo" />
           <span className="navbar-text">Medisafe</span>
         </div>
         <div className="navbar-right">
@@ -126,24 +204,91 @@ function App({loggedIn,isDoctor,isPatient,isConnectedToPeraWallet,handleConnectW
       {/* Second Section */}
       <div className="section">
         <div className="section-left">
-          <img src="image1.jpg" alt="Images 1" className="section-image" />
+          <img src="medisafe pg.jpg" alt="Images 1" className="section-image" />
         </div>
         <div className="section-right">
-          <h2 className='abt-heading'>Content Title</h2>
-          <p ref = {refright} />
+          <h2 className='abt-heading'>Unlock a New Era in Medical Care</h2>
+          <p ref = {refright1} />
         </div>
       </div>
 
       {/* Third Section */}
       <div className="section">
         <div className="section-left">
-          <h2>Content Title</h2>
-          <p ref = {refleft} />
+          <h2>Our Solution: Empowering You</h2>
+          <p ref = {refleft1} />
         </div>
         <div className="section-right">
-          <img src="image2.jpg" alt="Images 2" className="section-image" />
+          <img src="medisafe pg2.jpeg" alt="Images 2" className="section-image" />
         </div>
       </div>
+
+            {/* forth Section */}
+            <div className="section">
+        <div className="section-left">
+          <img src="medisafe pg4.jpg" alt="Images 1" className="section-image" />
+        </div>
+        <div className="section-right">
+          <h2 className='abt-heading'>Trust in Authenticity</h2>
+          <p ref = {refright2} />
+        </div>
+      </div>
+
+          {/* Third Section */}
+          <div className="section">
+        <div className="section-left">
+          <h2>Biometric Authorization</h2>
+          <p ref = {refleft2} />
+        </div>
+        <div className="section-right">
+          <img src="medisafe pg5.jpg" alt="Images 2" className="section-image" />
+        </div>
+      </div>
+
+                  {/* forth Section */}
+                  <div className="section">
+        <div className="section-left">
+          <img src="medisafe pg6.png" alt="Images 1" className="section-image" />
+        </div>
+        <div className="section-right">
+          <h2 className='abt-heading'>Rapid Medical Solutions</h2>
+          <p ref = {refright3} />
+        </div>
+      </div>
+
+                {/* Third Section */}
+                <div className="section">
+        <div className="section-left">
+          <h2>Personalized Insurance Recommendations</h2>
+          <p ref = {refleft3} />
+        </div>
+        <div className="section-right">
+          <img src="medisafe pg7.jpg" alt="Images 2" className="section-image" />
+        </div>
+      </div>
+
+                        {/* forth Section */}
+                        <div className="section">
+        <div className="section-left">
+          <img src="medisafe pg8.jpg" alt="Images 1" className="section-image" />
+        </div>
+        <div className="section-right">
+          <h2 className='abt-heading'>Seamless Appointment Management</h2>
+          <p ref = {refright4} />
+        </div>
+      </div>
+
+                      {/* Third Section */}
+                      <div className="section">
+        <div className="section-left">
+          <h2>Future-Ready and Secure</h2>
+          <p ref = {refleft4} />
+        </div>
+        <div className="section-right">
+          <img src="medisafe pg9.jpg" alt="Images 2" className="section-image" />
+        </div>
+      </div>
+
 
       <footer id="footer">
       <div class="down">

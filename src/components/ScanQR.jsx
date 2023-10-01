@@ -2,14 +2,14 @@ import React,{useEffect, useState} from "react";
 import { QRCodeSVG } from "qrcode.react";
 import { QrReader } from "react-qr-reader";
 import "../ScanQR.css";
-import { Navigate } from "react-router-dom";
+import { Navigate,Link } from "react-router-dom";
 import algosdk,{ OnApplicationComplete } from "algosdk";
 import appspec from '../application.json'
 import { Buffer } from 'buffer';
 
 
 
-function ScanQR({restapi,accountAddress,peraWallet}) {
+function ScanQR({restapi,accountAddress,peraWallet,handleDisconnectWalletClick}) {
     const [showCamera, setShowCamera] = useState(false);
     const toggleCamera = () => {
         setShowCamera(!showCamera);
@@ -22,6 +22,7 @@ function ScanQR({restapi,accountAddress,peraWallet}) {
     const [role, setRole] = useState('');
     const [name, setName] = useState('');
     const [data, setData] = useState({});
+    const [err, setErr] = useState('');
 
   
     const toggleMenu = () => {
@@ -111,6 +112,7 @@ function ScanQR({restapi,accountAddress,peraWallet}) {
           );
           const responseData = response.data;
           if ( responseData.statusCode === 302 ) {
+    
             console.log(responseData);
             window.location.href = "/";
           }
@@ -216,13 +218,15 @@ function ScanQR({restapi,accountAddress,peraWallet}) {
                           alert(responseData.notify);
                         }
                         else if ( responseData.statusCode === 200 ) {
-
                           setData(responseData.data);
                           if(responseData.data.is_having_access === true){
-                            console.log(responseData.data.patient_history)
+                            setErr('You have General access for data of this Patient, go to Patients Section for Accessing Data')
                           }
                           else if(responseData.data.is_having_emergency === true){
-                            console.log(responseData.data.patient_history)
+                            setErr('You have Emergency access for data of this Patient, go to Patients Section for Accessing Data')
+                          }
+                          else if(responseData.data.is_pending === true){
+                            setErr('You have Pending Request for data of this Patient, go to Patients Section for Accessing Status of Request')
                           }
                           else{
                             setRequestAccess(true);
@@ -302,16 +306,15 @@ function ScanQR({restapi,accountAddress,peraWallet}) {
               <button id='request_btn' onClick={handleRequestAccess}>Request Access</button>
           </div>
         ) : (
-          <div></div>
+          <div>{err}</div>
         )
       }
+    
       <div className={`dropdown-menu ${isMenuOpen ? 'open' : ''}`}>
-        <button>Doctors dealed</button>
-        <button>Recent reports</button>
-        <button>Add extra data</button>
-        <button>Edit contacts</button>
+        <Link to="/doctor_access">Patients dealed</Link>        
+        <Link to="/profile_qr">QR Scan</Link>
         <hr />
-        <button>Logout</button>
+        <button onClick={handleDisconnectWalletClick}>Logout</button>
         <div className="social-icons">
           <i className="fab fa-facebook"></i>
           <i className="fab fa-twitter"></i>

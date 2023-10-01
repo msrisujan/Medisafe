@@ -73,6 +73,7 @@ const [accountAddress, setAccountAddress] = useState(null);
     console.log("disconnect");
     peraWallet.disconnect();
     setAccountAddress(null);
+    window.location.href='/';
     // setLoggedIn(false);
     // setIsDoctor(false);
     // setIsPatient(false);
@@ -123,10 +124,11 @@ const [accountAddress, setAccountAddress] = useState(null);
           <Routes>
               <Route exact path="/" element={<Home loggedIn={loggedIn} isDoctor={isDoctor} isPatient={isPatient} isConnectedToPeraWallet={isConnectedToPeraWallet} handleConnectWalletClick={handleConnectWalletClick} handleDisconnectWalletClick={handleDisconnectWalletClick} />} />
               <Route path="/signup" element={<Signup peraWallet={peraWallet} accountAddress={accountAddress} />} />
-              <Route path="/doctorprofile" element={<NavbarProfile loggedIn={loggedIn} handleDisconnectWalletClick={handleDisconnectWalletClick} />} />
+              <Route path="/doctorprofile" element={<NavbarProfile accountAddress={accountAddress} restapi={restapi} loggedIn={loggedIn} handleDisconnectWalletClick={handleDisconnectWalletClick} />} />
               <Route path="/patientprofile" element={<NavbarProfile loggedIn={loggedIn} handleDisconnectWalletClick={handleDisconnectWalletClick}/>} />
-              <Route path="/profile_qr" element={<ScanQR restapi={restapi} loggedIn={loggedIn} peraWallet={peraWallet} accountAddress={accountAddress} />} />
-              <Route path="/doctor_access" element={<DoctorAccess restapi={restapi}/>} />
+              <Route path="/profile_qr" element={<ScanQR restapi={restapi} loggedIn={loggedIn} peraWallet={peraWallet} accountAddress={accountAddress} handleDisconnectWalletClick={handleDisconnectWalletClick} />} />
+              <Route path="/doctor_access" element={<DoctorAccess restapi={restapi} handleDisconnectWalletClick={handleDisconnectWalletClick}/>} />
+              {/* <Route path="/patient_requests" element={}/> */}
           </Routes>
         </Router>
   );
