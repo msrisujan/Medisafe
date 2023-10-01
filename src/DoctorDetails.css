@@ -77,10 +77,10 @@ html,body{
     color: #32d7db;
   }
   
-  .table-row:hover {
+  /* .table-row:hover {
     background-color: #9de2df98;
     cursor: pointer;
-  }
+  } */
 
 
   .tablecard{

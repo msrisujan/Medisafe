@@ -6,9 +6,12 @@ import {PeraWalletConnect} from "@perawallet/connect"
 import Home from './Home.jsx';
 import Signup from './Signup.jsx';
 import NavbarProfile from './NavbarProfile.jsx';
+import PatientNavbarProfile from './PatientNavbarProfile.jsx';
 import ScanQR from './ScanQR.jsx';
-import DoctorAccess from './DoctorAccess.jsx'
+import DoctorAccess from './DoctorAccess.jsx';
+import PatientAccept from './PatientAccept.jsx';
 import { Navigate } from 'react-router-dom';
+import PatientScanQR from './PatientScanQR.jsx';
 import axios from 'axios';
 
 
@@ -125,10 +128,11 @@ const [accountAddress, setAccountAddress] = useState(null);
               <Route exact path="/" element={<Home loggedIn={loggedIn} isDoctor={isDoctor} isPatient={isPatient} isConnectedToPeraWallet={isConnectedToPeraWallet} handleConnectWalletClick={handleConnectWalletClick} handleDisconnectWalletClick={handleDisconnectWalletClick} />} />
               <Route path="/signup" element={<Signup peraWallet={peraWallet} accountAddress={accountAddress} />} />
               <Route path="/doctorprofile" element={<NavbarProfile accountAddress={accountAddress} restapi={restapi} loggedIn={loggedIn} handleDisconnectWalletClick={handleDisconnectWalletClick} />} />
-              <Route path="/patientprofile" element={<NavbarProfile loggedIn={loggedIn} handleDisconnectWalletClick={handleDisconnectWalletClick}/>} />
+              <Route path="/patientprofile" element={<PatientNavbarProfile accountAddress={accountAddress} restapi={restapi} loggedIn={loggedIn} handleDisconnectWalletClick={handleDisconnectWalletClick}/>} />
               <Route path="/profile_qr" element={<ScanQR restapi={restapi} loggedIn={loggedIn} peraWallet={peraWallet} accountAddress={accountAddress} handleDisconnectWalletClick={handleDisconnectWalletClick} />} />
+              <Route path="/patient_qr" element={<PatientScanQR restapi={restapi} loggedIn={loggedIn} peraWallet={peraWallet} accountAddress={accountAddress} handleDisconnectWalletClick={handleDisconnectWalletClick} />} />
               <Route path="/doctor_access" element={<DoctorAccess restapi={restapi} handleDisconnectWalletClick={handleDisconnectWalletClick}/>} />
-              {/* <Route path="/patient_requests" element={}/> */}
+              <Route path="/patient_logs" element={<PatientAccept peraWallet={peraWallet} accountAddress={accountAddress} restapi={restapi} handleConnectWalletClick={handleDisconnectWalletClick}/>}/>
           </Routes>
         </Router>
   );

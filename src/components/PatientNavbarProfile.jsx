@@ -1,11 +1,39 @@
-import React, { useState } from 'react';
+import React, { useState,useEffect } from 'react';
 import { Link, Navigate } from 'react-router-dom';
 import '../Profile.css'; // Import the CSS file
-import Profile from './DoctorProfile.jsx';
+import Profile from './Profile.jsx';
 
-const NavbarProfile = ({loggedIn,handleDisconnectWalletClick }) => {
+const PatientNavbarProfile = ({accountAddress,restapi,loggedIn,handleDisconnectWalletClick }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isBlurred, setIsBlurred] = useState(false);
+  const [role, setRole] = useState('');
+  const [dob,setDob] = useState('');
+  const [name, setName] = useState('');
+
+  useEffect(() => {
+    // when page loads for the first time send a request to the server to get the data
+    async function sendRequest() {
+      try {
+        const response = await restapi.get("/user_info", {
+          method: "GET",
+        });
+        const responseData = response.data;
+        if (responseData.statusCode === 200) {
+          console.log(responseData.data);
+          setRole(responseData.data.local_state.role);
+          setName(responseData.data.local_state.name);
+          setDob(responseData.data.local_state.DOB);
+        }
+        else{
+          <Navigate to="/" />
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    }
+    sendRequest();
+  }
+  , []);
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
@@ -33,15 +61,17 @@ const NavbarProfile = ({loggedIn,handleDisconnectWalletClick }) => {
         </div>
       </nav>
     <Profile
-        hospitalsVisited={10}
-        doctorsVisited={5}
-        emergencyCases={3}
-        contacts={5}
+        accountAddress={accountAddress}
+        name={name}
+        dob={dob}
+        gender={'Male'}
+        doctorsVisited={3}
+        NoofRecords={5}
         isBlurred={isBlurred} // Pass the blur state to the Profile component
       />
     <div className={`dropdown-menu ${isMenuOpen ? 'open' : ''}`}>
-        <Link to="/doctor_access">Patients dealed</Link>        
-        <Link to="/profile_qr">QR Scan</Link>
+        <Link to="/patient_logs">Request Logs</Link>        
+        <Link to="/patient_qr">QR Scan</Link>
         <hr />
         <button onClick={handleDisconnectWalletClick}>Logout</button>
         <div className="social-icons">
@@ -59,4 +89,4 @@ const NavbarProfile = ({loggedIn,handleDisconnectWalletClick }) => {
   };
 };
 
-export default NavbarProfile;
+export default PatientNavbarProfile;

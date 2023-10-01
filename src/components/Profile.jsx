@@ -1,7 +1,7 @@
 import React from 'react';
 import '../Profile.css'; // Import the CSS file
 
-const Profile = ({ hospitalsVisited, doctorsVisited, emergencyCases, contacts, isBlurred }) => {
+const Profile = ({ accountAddress, name, dob, gender,doctorsVisited,NoofRecords, isBlurred }) => {
   const profileClass = isBlurred ? 'profile-section blurred' : 'profile-section';
 
   return (
@@ -18,14 +18,16 @@ const Profile = ({ hospitalsVisited, doctorsVisited, emergencyCases, contacts, i
                 </div>
       </div>
       <div className="profile-pic">
-        <img src="big-profile-pic.png" alt="Profile Pic" />
+        <img src="big-profile-pic.png" alt="Patient Profile" />
       </div>
       <div className="profile-info">
-        <p>No of hospitals visited using Medisafe: {hospitalsVisited}</p>
-        <p>Doctors visited: {doctorsVisited}</p>
-        <p>Data on Medisafe ecosystem:</p>
-        <p>Emergency cases triggered: {emergencyCases}</p>
-        <p>Contacts: {contacts} <i class="fa-regular fa-address-book"></i></p>
+      <p style={{overflow:"scroll"}}><b>Address:</b> {accountAddress}</p>
+      <p><b>Name: </b>{name}</p>
+        <p><b>Date of Birth:</b> {dob}</p>
+        <p><b>Gender:</b> {gender}</p>
+        <p><b>Doctors visited:</b> {doctorsVisited}</p>
+        <p><b>No.of Records Stored on Blockchain:</b> {NoofRecords}</p>
+        {/* <p>Contacts: {contacts} <i class="fa-regular fa-address-book"></i></p> */}
       </div>
     </div>
   );

@@ -140,6 +140,40 @@ class User():
                         return False
         return False
     
+    def generate_access_hash(self,request_hash,access_status):
+        if self.retrive_local_state()!=None:
+            if(self.local_state['role']=='PATIENT'):
+                q="SELECT * FROM request_log WHERE current_hash='{}' AND patient_add='{}'".format(request_hash,self.user_add)
+                con = mysql.connector.connect(host=DB_HOST , user=DB_USER, password=DB_PASSWORD, database=DB_NAME)
+                cursor = con.cursor(buffered=False, dictionary=True)
+                cursor.execute(q)
+                rows=cursor.fetchall()
+                if len(rows)>0:
+                    row=rows[0]
+                    time_stamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                    tup = tuple([self.user_add,row['doctor_add'],access_status,time_stamp,request_hash,self.local_state['reserved_local_valueaccess_hash']])
+                    return {"patient_add":self.user_add,"doctor_add":row['doctor_add'],"access_status":access_status,"time_stamp":time_stamp,"request_hash":request_hash,"previous_hash":self.local_state['reserved_local_valueaccess_hash'],"current_hash":hashTuple(tup)}
+        return None
+            
+    def update_access_hash(self,obj):
+        if self.retrive_local_state()!=None:
+            if(self.local_state['role'])=='PATIENT':
+                tup = tuple([self.user_add,obj['doctor_add'],obj['access_status'],obj['time_stamp'],obj['request_hash'],obj['previous_hash']])
+                if(obj['current_hash']==self.local_state['reserved_local_valueaccess_hash']) and obj['current_hash']==hashTuple(tup):
+                    con = mysql.connector.connect(host=DB_HOST , user=DB_USER, password=DB_PASSWORD, database=DB_NAME)
+                    cursor = con.cursor(buffered=False, dictionary=True)
+                    q="INSERT INTO access_log (`patient_add`,`doctor_add`,`access_status`,`time_stamp`,`request_hash`,`previous_hash`,`current_hash`) VALUES ('{}','{}','{}','{}','{}','{}','{}')".format(
+                        self.user_add,obj['doctor_add'],obj['access_status'],obj['time_stamp'],obj['request_hash'],obj['previous_hash'],obj['current_hash']
+                    )
+                    try:
+                        cursor.execute(q)
+                        con.commit()
+                        return True
+                    except errors.IntegrityError as e:
+                        return False
+        return False
+
+    
     def get_patient_history(self):
         if self.retrive_local_state()!=None:
             if(self.local_state['role']=='PATIENT'):
@@ -312,10 +346,7 @@ def get_scan_details():
                                     if(len(checkss)==0):
                                         is_pending=True
                         return json.dumps({"statusCode":200,"data":{"user_add":scan_user.user_add,"is_opted":scan_user.is_opted,"is_having_access":is_having_access,"is_having_emergency":is_having_emergency,"is_pending":is_pending,"patient_details":scan_user.retrive_local_state()}})
-                        #     else:
-                        #         return json.dumps({"statusCode":200,"data":{"user_add":scan_user.user_add,"is_opted":scan_user.is_opted,"is_having_access":is_having_access,"is_having_emergency":is_having_emergency,"patient_history":scan_user.get_patient_history(),"patient_details":scan_user.retrive_local_state()}})
-                        # else:
-                        #     return json.dumps({"statusCode":200,"data":{"user_add":scan_user.user_add,"is_opted":scan_user.is_opted,"is_having_access":is_having_access,"is_having_emergency":is_having_emergency,"patient_history":scan_user.get_patient_history(),"patient_details":scan_user.retrive_local_state()}})
+
                     else:
                         return json.dumps({"statusCode":403,"notify":"Can't Access Doctor Profile.!!"})
                 else:
@@ -388,6 +419,40 @@ def update_request_hash():
     else:
         return json.dumps({"statusCode":302,"href":"/login","notify":"Login To Continue.!!"})
 
+@app.route('/generate_access_hash',methods=['POST'])
+def generate_access_hash():
+    if session.get('user'):
+        patient=pickle.loads(session.get('user'))
+        if patient.local_state['role']=='PATIENT':
+            request_hash=request.json['request_hash']
+            access_status=request.json['access_status']
+            res=patient.generate_access_hash(request_hash,access_status)
+            if res != None:
+                return json.dumps({"statusCode":200,"obj":res})
+            else:
+                return json.dumps({"statusCode":500,"notify":"Something went Wrong.!!"})
+        else:
+            return json.dumps({"statusCode":403,"notify":"Dont have Access to This Method"})
+    else:
+        return json.dumps({"statusCode":302,"href":"/login","notify":"Login To Continue.!!"})
+
+@app.route('/update_access_hash',methods=['POST'])
+def update_access_hash():
+    if session.get('user'):
+        patient = pickle.loads(session.get('user'))
+        if patient.local_state['role']=='PATIENT':
+            obj=request.json['obj']
+            res=patient.update_access_hash(obj)
+            if(res):
+                return json.dumps({"statusCode":200,"notify":"Access Updated Successfully.!!"})
+            else:
+                return json.dumps({"statusCode":500,"notify":"Some Unknown error Occured"})
+        else:
+            return json.dumps({"statusCode":403,"notify":"Dont have Access to This Method"})
+    else:
+        return json.dumps({"statusCode":302,"href":"/login","notify":"Login To Continue.!!"})
+
+    
     
 
 @app.route('/doctor_access',methods=['GET'])
@@ -518,6 +583,46 @@ def patient_access():
             return json.dumps({"statusCode":403,"notify":"Unauthorized Access"})
     else:
         return json.dumps({"statusCode":302,"href":"/login","notify":"Login To Continue.!!"})
+
+
+@app.route('/get_request_log',methods=['GET'])
+def get_request_logs():
+    if session.get('user'):
+        patient=pickle.loads(session.get('user'))
+        if patient.local_state['role']=='PATIENT':
+            con = mysql.connector.connect(host=DB_HOST , user=DB_USER, password=DB_PASSWORD, database=DB_NAME)
+            cursor = con.cursor(buffered=False, dictionary=True)
+            q="SELECT * FROM request_log WHERE patient_add='{}' ORDER BY id DESC".format(patient.user_add)
+            cursor.execute(q)
+            rows=cursor.fetchall()
+            json_data=[]
+            i=1
+            for row in rows:
+                js={}
+                js['sno']=i
+                checkq="SELECT * FROM access_log WHERE patient_add='{}' AND request_hash='{}'".format(patient.user_add,row['current_hash'])
+                cursor.execute(checkq)
+                res=cursor.fetchall()
+                if(len(res)>0):
+                    if(res[0]['access_status']==0):
+                        js['access_status']=0
+                    else:
+                        js['access_status']=1
+                    js['access_given_on']=res[0]['time_stamp'].strftime("%Y-%m-%d %H:%M:%S")
+                else:
+                    js['access_status']=-1
+                js['request_hash']=row['current_hash']
+                js['doctor_name']=User(row['doctor_add']).local_state['name']
+                js['date']=row['time_stamp'].strftime("%Y-%m-%d %H:%M:%S")
+                js['note']=row['note']
+                i+=1
+                json_data.append(js)
+            print(json_data)
+            return json.dumps({"statusCode":200,"data":json_data})
+    else:
+        return json.dumps({"statusCode":302,"href":"/login","notify":"Login To Continue.!!"})
+    
+
 
 
 
