@@ -118,7 +118,7 @@ class User():
             if(self.local_state['role']=='DOCTOR'):
                 previous_hash=self.local_state['reserved_local_valuerequest_hash']
                 time_stamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                tup = tuple(self.user_add,patient_add,request_type,note,time_stamp,previous_hash)
+                tup = tuple([self.user_add,patient_add,request_type,note,time_stamp,previous_hash])
                 return {"doctor_add":self.user_add,"patient_add":patient_add,"request_type":request_type,"note":note,
                         "time_stamp":time_stamp,"previous_hash":previous_hash,"current_hash":hashTuple(tup)}
         return None
@@ -126,15 +126,16 @@ class User():
     def update_request_hash(self,obj):
         if self.retrive_local_state()!=None:
             if(self.local_state['role'])=='DOCTOR':
-                tup = tuple(self.user_add,obj['patient_add'],obj['request_type'],obj['note'],obj['time_stamp'],obj['previous_hash'])
+                tup = tuple([self.user_add,obj['patient_add'],obj['request_type'],obj['note'],obj['time_stamp'],obj['previous_hash']])
                 if(obj['current_hash']==self.local_state['reserved_local_valuerequest_hash']) and obj['current_hash']==hashTuple(tup):
                     con = mysql.connector.connect(host=DB_HOST , user=DB_USER, password=DB_PASSWORD, database=DB_NAME)
                     cursor = con.cursor(buffered=False, dictionary=True)
-                    q="INSERT INTO request_log (`doctor_add`,`patient_add`,`request_type`,`note`,`time_stamp`,`previous_hash`,`current_hash`) VALUES ({},{},{},{},{},{},{})".format(
+                    q="INSERT INTO request_log (`doctor_add`,`patient_add`,`request_type`,`note`,`time_stamp`,`previous_hash`,`current_hash`) VALUES ('{}','{}','{}','{}','{}','{}','{}')".format(
                         self.user_add,obj['patient_add'],obj['request_type'],obj['note'],obj['time_stamp'],obj['previous_hash'],obj['current_hash']
                     )
                     try:
                         cursor.execute(q)
+                        con.commit()
                         return True
                     except errors.IntegrityError as e:
                         return False
@@ -157,6 +158,36 @@ class User():
                     jsonrow['addedby']=User(row['doctor_add']).local_state['name']
                     jsonrow['addedon']=row['time_stamp']
                     jsonrow['attachments']=row['attachments']
+                    json.append(jsonrow)
+                    i+=1
+                return json
+        return []
+    
+    def get_patient_data(self):
+        if self.retrive_local_state()!=None:
+            if(self.local_state['role']=='PATIENT'):
+                q="SELECT * FROM data_log WHERE patient_add='{}' ORDER BY id DESC".format(self.user_add)
+                con = mysql.connector.connect(host=DB_HOST , user=DB_USER, password=DB_PASSWORD, database=DB_NAME)
+                cursor = con.cursor(buffered=False, dictionary=True)
+                cursor.execute(q)
+                rows=cursor.fetchall()
+                json=[]
+                i=1
+                for row in rows:
+                    jsonrow={}
+                    jsonrow['snum']=i
+                    jsonrow['date']=row['time_stamp']
+                    jsonrow['doctorname']=User(row['doctor_add']).local_state['name']
+                    jsonrow['patient_prescription']=row['data']
+                    jsonrow['patient_attachments']=row['attachments']
+                    jsonrow['doctordetails'] = {}
+                    jsonrow['doctordetails']['name']=jsonrow['doctorname']
+                    if row['current_hash']=='':
+                        jsonrow['need_approval']=True
+                        jsonrow['current_hash']=hashTuple(tuple([row['patient_add'],row['doctor_add'],row['time_stamp'],row['data'],row['attachments'],row['access_hash'],row['previous_hash']]))
+                    else:
+                        jsonrow['need_approval']=False
+                        jsonrow['current_hash']=row['current_hash']
                     json.append(jsonrow)
                     i+=1
                 return json
@@ -207,7 +238,7 @@ class User():
 
 app = Flask(__name__)
 app.secret_key = 'algo-project'
-CORS(app,resources={r"/*": {"origins": "*"}})
+CORS(app,supports_credentials=True)
 
 
 
@@ -223,7 +254,7 @@ def login():
 
 
 
-@app.route('/user_info',methods=['POST'])
+@app.route('/user_info',methods=['GET'])
 def user_info():
     if session.get('user'):
         user = pickle.loads(session.get('user'))
@@ -263,17 +294,29 @@ def get_scan_details():
                         cursor.execute(q)
                         rows=cursor.fetchall()
                         is_having_access = True if len(rows)>0 else False
+                        is_having_emergency=False
+                        is_pending=False
                         if not is_having_access:
                             q="SELECT * FROM request_log WHERE patient_add='{}' AND doctor_add='{}' AND request_type=2 AND ADDDATE(time_stamp, INTERVAL 1 DAY)>'{}'".format(scan_user.user_add,user.user_add,datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
                             cursor.execute(q)
                             rows=cursor.fetchall()
                             is_having_emergency=True if len(rows)>0 else False
                             if not is_having_emergency:
-                                return json.dumps({"statusCode":200,"data":{"user_add":scan_user.user_add,"is_opted":scan_user.is_opted,"is_having_access":is_having_access,"is_having_emergency":is_having_emergency,"patient_details":scan_user.retrive_local_state()}})
-                            else:
-                                return json.dumps({"statusCode":200,"data":{"user_add":scan_user.user_add,"is_opted":scan_user.is_opted,"is_having_access":is_having_access,"is_having_emergency":is_having_emergency,"patient_history":scan_user.get_patient_history(),"patient_details":scan_user.retrive_local_state()}})
-                        else:
-                            return json.dumps({"statusCode":200,"data":{"user_add":scan_user.user_add,"is_opted":scan_user.is_opted,"is_having_access":is_having_access,"is_having_emergency":is_having_emergency,"patient_history":scan_user.get_patient_history(),"patient_details":scan_user.retrive_local_state()}})
+                                q="SELECT * FROM request_log WHERE patient_add='{}' AND doctor_add='{}' ORDER BY id DESC".format(scan_user.user_add,user.user_add)
+                                cursor.execute(q)
+                                rows = cursor.fetchall()
+                                if(len(rows)>0):
+                                    row=rows[0]
+                                    check="SELECT * FROM access_log WHERE patient_add='{}' AND doctor_add='{}' AND request_has='{}'".format(row['patient_add'],row['doctor_add'],row['current_hash'])
+                                    cursor.execute(check)
+                                    checkss=cursor.fetchall()
+                                    if(len(checkss)==0):
+                                        is_pending=True
+                        return json.dumps({"statusCode":200,"data":{"user_add":scan_user.user_add,"is_opted":scan_user.is_opted,"is_having_access":is_having_access,"is_having_emergency":is_having_emergency,"is_pending":is_pending,"patient_details":scan_user.retrive_local_state()}})
+                        #     else:
+                        #         return json.dumps({"statusCode":200,"data":{"user_add":scan_user.user_add,"is_opted":scan_user.is_opted,"is_having_access":is_having_access,"is_having_emergency":is_having_emergency,"patient_history":scan_user.get_patient_history(),"patient_details":scan_user.retrive_local_state()}})
+                        # else:
+                        #     return json.dumps({"statusCode":200,"data":{"user_add":scan_user.user_add,"is_opted":scan_user.is_opted,"is_having_access":is_having_access,"is_having_emergency":is_having_emergency,"patient_history":scan_user.get_patient_history(),"patient_details":scan_user.retrive_local_state()}})
                     else:
                         return json.dumps({"statusCode":403,"notify":"Can't Access Doctor Profile.!!"})
                 else:
@@ -311,6 +354,41 @@ def get_doctor_past():
         
     else:
         return json.dumps({"statusCode":302,"href":"/login","notify":"Login To Continue.!!"})
+    
+@app.route('/generate_request_hash',methods=['POST'])
+def generate_request_hash():
+    if session.get('user'):
+        doctor=pickle.loads(session.get('user'))
+        if doctor.local_state['role']=='DOCTOR':
+            patient_add=request.json['patient_add']
+            request_type=request.json['request_type']
+            note=request.json['note']
+            res=doctor.generate_request_hash(patient_add,request_type,note)
+            if res != None:
+                return json.dumps({"statusCode":200,"obj":res})
+            else:
+                return json.dumps({"statusCode":500,"notify":"Something went Wrong.!!"})
+        else:
+            return json.dumps({"statusCode":403,"notify":"Dont have Access to This Method"})
+    else:
+        return json.dumps({"statusCode":302,"href":"/login","notify":"Login To Continue.!!"})
+
+@app.route('/update_request_hash',methods=['POST'])
+def update_request_hash():
+    if session.get('user'):
+        doctor = pickle.loads(session.get('user'))
+        if doctor.local_state['role']=='DOCTOR':
+            obj=request.json['obj']
+            res=doctor.update_request_hash(obj)
+            if(res):
+                return json.dumps({"statusCode":200,"notify":"Request Sent Successfully.!!"})
+            else:
+                return json.dumps({"statusCode":500,"notify":"Some Unknown error Occured"})
+        else:
+            return json.dumps({"statusCode":403,"notify":"Dont have Access to This Method"})
+    else:
+        return json.dumps({"statusCode":302,"href":"/login","notify":"Login To Continue.!!"})
+
     
 
 @app.route('/doctor_access',methods=['GET'])
@@ -384,6 +462,7 @@ def doctor_access():
                     js['access_endson']=get_time_left(r[0]['time_stamp'])
                 else:
                     js['request_access']='expired'
+                    js['access_endson']='-'
             if js['request_access']=='active':
                 js['patient_history']=patient.get_patient_history()
             else:
@@ -393,6 +472,48 @@ def doctor_access():
         return json.dumps({"statusCode":200,"data":json_data})
     else:
         return json.dumps({"statusCode":302,"href":"/login","notify":"Login To Continue.!!"})
+    
+@app.route("/send_data",methods=['POST'])
+def send_data():
+    if session.get('user'):
+        doctor=pickle.loads(session.get('user'))
+        if doctor.local_state['role']=='DOCTOR':
+            con = mysql.connector.connect(host=DB_HOST , user=DB_USER, password=DB_PASSWORD, database=DB_NAME)
+            cursor = con.cursor(buffered=False, dictionary=True)
+            patient_add=request.json['patient_add']
+            access_hash=request.json['access_hash']
+            data=request.json['data']
+            date=datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            q="SELECT * FROM access_log WHERE patient_add='{}' AND access_hash='{}' AND doctor_add='{}'".format(patient_add,access_hash,doctor.user_add)
+            cursor.execute(q)
+            rows=cursor.fetchall()
+            if len(rows)>0:
+                row=rows[0]
+                patient = User(patient_add)
+                q="INSERT INTO data_log (`patient_add`,`doctor_add`,`time_stamp`,`data`,`attachments`,`access_hash`,`previous_hash`) VALUES('{}','{}','{}','{}','{}','{}','{}')".format(patient_add,doctor.user_add,date,'',access_hash,patient.local_state['reserved_local_valuedata_hash'])
+                try:
+                    cursor.execute(q)
+                    con.commit()
+                    return json.dumps({"statusCode":200})
+                except errors.IntegrityError as e:
+                    return json.dumps({"statusCode":403,"notify":"Query Failed"})
+            else:
+                return json.dumps({"statusCode":403,"notify":"Malfunctioned Data"})
+    else:
+        return json.dumps({"statusCode":302,"href":"/login","notify":"Login To Continue.!!"})
+
+@app.route('/patient_access',methods=['GET'])
+def patient_access():
+    if session.get('user'):
+        patient = pickle.loads(session.get('user'))
+        if patient.local_state['role']=='PATIENT':
+            jsonn=patient.get_patient_data()
+            return json.dumps({"statusCode":200,'data':jsonn})
+        else:
+            return json.dumps({"statusCode":403,"notify":"Unauthorized Access"})
+    else:
+        return json.dumps({"statusCode":302,"href":"/login","notify":"Login To Continue.!!"})
+
 
 
 @app.route('/logout',methods=['GET'])

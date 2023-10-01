@@ -1,17 +1,17 @@
-import React, { useState } from 'react';
+import React, { useState,useEffect } from 'react';
+import { Navigate } from 'react-router-dom';
 import '../DoctorDetails.css';
 
-const DoctorAccess = () => {
+const DoctorAccess = ({restapi}) => {
   const [selectedRow, setSelectedRow] = useState(null);
   const [data, setData] = useState([]);
   useEffect(() => {
+    console.log("useeffect");
     // when page loads for the first time send a request to the server to get the data
     async function sendRequest() {
       try {
-        const response = await fetch("http://localhost:5000/doctor_access", {
-          method: "GET",
-        });
-        const responseData = await response.json();
+        const response = await restapi.get("/doctor_access");
+        const responseData =  response.data;
         if (responseData.statusCode === 200) {
           setData(responseData.data);
         }
@@ -47,6 +47,9 @@ const DoctorAccess = () => {
       if(responseData.statusCode === 200){
         alert("Data submitted successfully");
         window.location.reload();
+      }
+      else if(responseData.statusCode  === 403){
+        alert(responseData.notify);
       }
       else{
         alert("Some error occured");

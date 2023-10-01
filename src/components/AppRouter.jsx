@@ -7,6 +7,10 @@ import Home from './Home.jsx';
 import Signup from './Signup.jsx';
 import NavbarProfile from './NavbarProfile.jsx';
 import ScanQR from './ScanQR.jsx';
+import DoctorAccess from './DoctorAccess.jsx'
+import { Navigate } from 'react-router-dom';
+import axios from 'axios';
+
 
 const AppRouter = () => {
   const peraWallet = new PeraWalletConnect({
@@ -14,13 +18,30 @@ const AppRouter = () => {
     chainId: "416002",
     shouldShowSignTxnToast: false
 });
+
+
+const restapi = axios.create({
+  baseURL: 'http://127.0.0.1:5000',
+  withCredentials: true
+});
+
+restapi.interceptors.request.use(
+  function(config) {
+    config.headers.withcredentials = true;   
+    return config;
+  },
+  function(err) {
+    console.log(err);
+  }
+);
+
 const [accountAddress, setAccountAddress] = useState(null);
   const [loggedIn, setLoggedIn] = useState(false);
   const [isDoctor, setIsDoctor] = useState(false);
   const [isPatient, setIsPatient] = useState(false);
   const isConnectedToPeraWallet = !!accountAddress;
 
-  useEffect(() => {
+  function reconnectWallet() {
     // Reconnect to the session when the component is mounted
     peraWallet.reconnectSession().then((accounts) => {
       // Setup the disconnect event listener
@@ -30,7 +51,9 @@ const [accountAddress, setAccountAddress] = useState(null);
         setAccountAddress(accounts[0]);
       }
     });
-  }, []);
+  }
+  reconnectWallet();
+
   
   function handleConnectWalletClick() {
     peraWallet
@@ -47,23 +70,26 @@ const [accountAddress, setAccountAddress] = useState(null);
       });
   }
   function handleDisconnectWalletClick() {
+    console.log("disconnect");
     peraWallet.disconnect();
     setAccountAddress(null);
+    // setLoggedIn(false);
+    // setIsDoctor(false);
+    // setIsPatient(false);
  }
 
  useEffect(() => {
   async function sendRequest() {
     try {
-      const response = await fetch("http://localhost:5000/login", {
+      const response = await restapi.post("/login",JSON.stringify({
+        user_add: accountAddress,
+      }),{
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          user_add: accountAddress,
-        }),
+        }
       });
-      const responseData = await response.json();
+      const responseData = response.data;
       if ( responseData.statusCode === 302 ) {
         console.log(responseData);
         setLoggedIn(true);
@@ -97,9 +123,10 @@ const [accountAddress, setAccountAddress] = useState(null);
           <Routes>
               <Route exact path="/" element={<Home loggedIn={loggedIn} isDoctor={isDoctor} isPatient={isPatient} isConnectedToPeraWallet={isConnectedToPeraWallet} handleConnectWalletClick={handleConnectWalletClick} handleDisconnectWalletClick={handleDisconnectWalletClick} />} />
               <Route path="/signup" element={<Signup peraWallet={peraWallet} accountAddress={accountAddress} />} />
-              <Route path="/doctorprofile" element={<NavbarProfile />} />
-              <Route path="/patientprofile" element={<NavbarProfile />} />
-              <Route path="/profile_qr" element={<ScanQR accountAddress={accountAddress} />} />
+              <Route path="/doctorprofile" element={<NavbarProfile loggedIn={loggedIn} handleDisconnectWalletClick={handleDisconnectWalletClick} />} />
+              <Route path="/patientprofile" element={<NavbarProfile loggedIn={loggedIn} handleDisconnectWalletClick={handleDisconnectWalletClick}/>} />
+              <Route path="/profile_qr" element={<ScanQR restapi={restapi} loggedIn={loggedIn} peraWallet={peraWallet} accountAddress={accountAddress} />} />
+              <Route path="/doctor_access" element={<DoctorAccess restapi={restapi}/>} />
           </Routes>
         </Router>
   );

@@ -110,6 +110,7 @@ function App({loggedIn,isDoctor,isPatient,isConnectedToPeraWallet,handleConnectW
       {
         isPatient ? <Navigate to="/patientprofile" /> : null
       }
+      
      
 
       <section className="animated-section">

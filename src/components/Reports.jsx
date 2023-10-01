@@ -100,8 +100,8 @@ const DoctorDetails = () => {
             <div className='details'>
             <h2>Row Details</h2>
             <h4>Prescription</h4>
-            <p>selectedRow.patient_prescription</p>
-            <a href={`${selectedRow.patient_attachments}`}>Attachments</a>
+            <p>{selectedData.patient_prescription}</p>
+            <a href={`${selectedData.patient_attachments}`}>Attachments</a>
             <button onClick={handleBackClick} className="back-button button">
               Back to Table
             </button>

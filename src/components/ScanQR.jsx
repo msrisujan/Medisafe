@@ -3,8 +3,13 @@ import { QRCodeSVG } from "qrcode.react";
 import { QrReader } from "react-qr-reader";
 import "../ScanQR.css";
 import { Navigate } from "react-router-dom";
+import algosdk,{ OnApplicationComplete } from "algosdk";
+import appspec from '../application.json'
+import { Buffer } from 'buffer';
 
-function ScanQR({accountAddress}) {
+
+
+function ScanQR({restapi,accountAddress,peraWallet}) {
     const [showCamera, setShowCamera] = useState(false);
     const toggleCamera = () => {
         setShowCamera(!showCamera);
@@ -15,7 +20,9 @@ function ScanQR({accountAddress}) {
     const [isBlurred, setIsBlurred] = useState(false);
     const [requestAccess, setRequestAccess] = useState(false);
     const [role, setRole] = useState('');
+    const [name, setName] = useState('');
     const [data, setData] = useState({});
+
   
     const toggleMenu = () => {
       setIsMenuOpen(!isMenuOpen);
@@ -28,14 +35,14 @@ function ScanQR({accountAddress}) {
         // when page loads for the first time send a request to the server to get the data
         async function sendRequest() {
           try {
-            const response = await fetch("http://localhost:5000/user_info", {
+            const response = await restapi.get("/user_info", {
               method: "GET",
             });
-            const responseData = await response.json();
+            const responseData = response.data;
             if (responseData.statusCode === 200) {
               console.log(responseData.data);
-              setRole(responseData.data.role);
-
+              setRole(responseData.data.local_state.role);
+              setName(responseData.data.local_state.name)
             }
             else{
               <Navigate to="/" />
@@ -47,6 +54,117 @@ function ScanQR({accountAddress}) {
         sendRequest();
       }
       , []);
+
+      function peraWalletSigner(peraWallet){
+        return async (txnGroup, indexesToSign) => {
+          return await peraWallet.signTransaction([
+            txnGroup.map((txn, index) => {
+              if (indexesToSign.includes(index)) {
+                return {
+                  txn,
+                  signers: [accountAddress],
+                };
+              }
+      
+              return {
+                txn,
+                signers: [],
+              };
+            }),
+          ]);
+        };
+      }
+    
+    async function ski(obj) {
+    const baseServer = 'https://testnet-algorand.api.purestake.io/ps2'
+    const port = '';
+    const token = {
+        'X-API-Key': 'LFIoc7BZFY4CAAHfCC2at53vp5ZabBio5gAQ0ntL'
+    }
+    const algodclient = new algosdk.Algodv2(token, baseServer, port);
+    const suggestedParams = await algodclient.getTransactionParams().do();
+    const contract = new algosdk.ABIContract(appspec.contract);
+    const atc = new algosdk.AtomicTransactionComposer();
+    console.log("ac add",accountAddress);
+    
+    atc.addMethodCall({
+        appID:394681975,
+        method:algosdk.getMethodByName(contract.methods, 'add_request_hash'),
+        methodArgs: [obj.current_hash],
+        note: new Uint8Array(Buffer.from(JSON.stringify(obj).length<1024?JSON.stringify(obj):'')),
+        sender: accountAddress,
+        suggestedParams:suggestedParams,
+        signer: peraWalletSigner(peraWallet),
+        onComplete: OnApplicationComplete.NoOpOC
+    })
+    console.log(atc);
+
+    atc.execute(algodclient,4)
+      .then(async result => {
+        console.log(result);
+        const response = await restapi.post("/update_request_hash",JSON.stringify({
+              obj: obj,
+            }),
+            {headers: {
+              "Content-Type": "application/json",
+            }}
+          );
+          const responseData = response.data;
+          if ( responseData.statusCode === 302 ) {
+            console.log(responseData);
+            window.location.href = "/";
+          }
+          if ( responseData.statusCode === 200 ) {
+            console.log(responseData);
+            alert(responseData.notify);
+            window.location.reload();
+          }
+          else{
+            alert(responseData.notify);
+          }
+      })
+      .catch(error => {
+        // console.error(error);
+        alert(error)
+      });
+    }
+
+      async function handleRequestAccess(){
+        var btn = document.getElementById('request_btn');
+        btn.disabled=true;
+        var request_type = document.getElementById('request_type').value;
+        var note = document.getElementById('data').value
+        if(note.length<1){
+          alert("Enter note");
+          btn.disabled=false;
+          return;
+        }
+        if(note.length>500){
+          alert("note must be less than 500 chars");
+          btn.disabled=false;
+          return;
+        }
+        var response = await restapi.post('/generate_request_hash',JSON.stringify({
+          patient_add:data.user_add,
+          request_type:request_type,
+          note:note
+        }),{headers:{
+          "Content-Type": "application/json",
+        }})
+        var responseData = response.data
+        console.log(responseData);
+        if(responseData.statusCode===200){
+          console.log(responseData.obj);
+          await ski(responseData.obj)
+        }
+        else if(responseData.statusCode==500 || responseData.statusCode==403){
+          alert(responseData.notify);
+        }
+        else{
+          window.location.href="/";
+        }
+        btn.disabled=false;
+      }
     return (
         <div className="navbar-container">
       <nav className="navbar"> {/* Use the class name directly */}
@@ -82,17 +200,17 @@ function ScanQR({accountAddress}) {
             <QrReader
                 delay={300}
                 onResult={async(result, error) => {
+                  console.log(result);
                     if (!!result) {
-                      const response = await fetch("http://localhost:5000/get_scan_details", {
-                        method: "POST",
+                      console.log(result);
+                      const response = await restapi.post("/get_scan_details",JSON.stringify({
+                        add: result?.text,
+                      }), {
                         headers: {
                           "Content-Type": "application/json",
-                        },
-                        body: JSON.stringify({
-                          add: result?.text,
-                        }),
+                        }
                       });
-                      const responseData = await response.json();
+                      const responseData = response.data;
                       if ( role === "DOCTOR" ) {
                         if ( responseData.statusCode === 403 ) {
                           alert(responseData.notify);
@@ -131,7 +249,7 @@ function ScanQR({accountAddress}) {
                     }
           
                     if (!!error) {
-                      console.info(error);
+                      //console.info(error);
                     }
                   }}
 
@@ -144,11 +262,11 @@ function ScanQR({accountAddress}) {
             <div className="user-info">
             <QRCodeSVG
                 value={`${accountAddress}`}
-                bgColor = {"#023252"}
-                fgColor = {"#6EE7F2"}
+                bgColor = {"#fff"}
+                fgColor = {"#000"}
                 />
-                <p>Username: username</p>
-                <p>Medisafe ID: id</p>
+                <p>Username: {name}</p>
+                <p>Role: {role}</p>
             </div>
         )}                 
         <button onClick={toggleCamera} className="button">
@@ -169,7 +287,6 @@ function ScanQR({accountAddress}) {
         ) : (
           <div></div>
         )
-
       }
 
 
@@ -177,14 +294,12 @@ function ScanQR({accountAddress}) {
       {
         requestAccess ? (
           <div className="request-access">
-            <form>
-              <select>
-                <option value="2">Emergency Access</option>
-                <option value="1">Normal Access</option>
+              <select id='request_type'>
+              <option value="1">Normal Access</option>
+              <option value="2">Emergency Access</option>
               </select>
-              <textarea placeholder="Enter your note"></textarea>
-              <button>Request Access</button>
-            </form>
+              <textarea id='data' placeholder="Enter your note"></textarea>
+              <button id='request_btn' onClick={handleRequestAccess}>Request Access</button>
           </div>
         ) : (
           <div></div>
