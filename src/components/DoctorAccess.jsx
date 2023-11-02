@@ -220,33 +220,32 @@ const DoctorAccess = ({restapi,handleDisconnectWalletClick}) => {
   const blur_class = isBlurred ? 'blur' : '';
 
   return (
-    <div className="navbar-container">
+    <div className="navbar-container profile-body">
       <nav className="navbar"> {/* Use the class name directly */}
-      <div className="logo">
-        <img src="logo.png" alt="Medisafe Logo" />
-        <span>Medisafe</span>
-      </div>
-      <div className="profile">
-        <img src="profilepic.png" alt="Profile Pic" />
-        <span>Hello, </span>
-        <button class={hamburger_class} type="button" onClick={toggleMenu}>
-          <span class="hamburger-box">
-            <span class="hamburger-inner"></span>
-          </span>
-        </button>  
-        
-      </div>
-    </nav>
+        <div className="logo">
+          <img src="logo.png" alt="Medisafe Logo" />
+          <span className='nav-heading'>MEDISAFE</span>
+        </div>
+        <div className="profile">
+          <img src="profile.png" alt="Profile Pic" />
+          {/* <span>Hello, {userName}</span> */}
+          <button class={hamburger_class} type="button" onClick={toggleMenu}>
+            <span class="hamburger-box">
+              <span class="hamburger-inner"></span>
+            </span>
+          </button>  
+        </div>
+      </nav>
     <div className='doctor-details-container'>
-      <h1 className="center-heading">Doctor Details</h1>
+      <h1 className="center-heading">Patients Dealed</h1>
       {renderTable()}
     </div>
       
     <div className={`dropdown-menu ${isMenuOpen ? 'open' : ''}`}>
-        <Link to="/doctor_access">Patients dealed</Link>        
-        <Link to="/profile_qr">QR Scan</Link>
+        <Link className='button' to="/doctor_access">Patients dealed</Link>        
+        <Link className='button' to="/profile_qr">QR Scan</Link>
         <hr />
-        <button onClick={handleDisconnectWalletClick}>Logout</button>
+        <button className='button' onClick={handleDisconnectWalletClick}>Logout</button>
         <div className="social-icons">
           <i className="fab fa-facebook"></i>
           <i className="fab fa-twitter"></i>

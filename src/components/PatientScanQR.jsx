@@ -168,21 +168,20 @@ function PatientScanQR({restapi,accountAddress,peraWallet,handleDisconnectWallet
         btn.disabled=false;
       }
     return (
-        <div className="navbar-container">
+        <div className="navbar-container scan-body">
       <nav className="navbar"> {/* Use the class name directly */}
         <div className="logo">
           <img src="logo.png" alt="Medisafe Logo" />
-          <span>Medisafe</span>
+          <span className='nav-heading'>MEDISAFE</span>
         </div>
         <div className="profile">
-          <img src="profilepic.png" alt="Profile Pic" />
-          <span>Hello, </span>
+          <img src="profile.png" alt="Profile Pic" />
+          {/* <span>Hello, {userName}</span> */}
           <button class={hamburger_class} type="button" onClick={toggleMenu}>
             <span class="hamburger-box">
               <span class="hamburger-inner"></span>
             </span>
           </button>  
-          
         </div>
       </nav>
         <div className={`card ${blur_class}`}>
@@ -264,16 +263,18 @@ function PatientScanQR({restapi,accountAddress,peraWallet,handleDisconnectWallet
           </div>
         ) : (
             <div className="user-info">
-            <QRCodeSVG
-                value={`${accountAddress}`}
-                bgColor = {"#fff"}
-                fgColor = {"#000"}
+              <div className="qr">
+                <QRCodeSVG
+                    value={`${accountAddress}`}
+                    bgColor = {"#fff"}
+                    fgColor = {"#000"}
                 />
+              </div>
                 <p>Username: {name}</p>
                 <p>Role: {role}</p>
             </div>
         )}                 
-        <button onClick={toggleCamera} className="button">
+        <button onClick={toggleCamera} className="button1">
           {showCamera ? 'Show QR' : 'Scan QR'}
         </button>
       </div>
@@ -311,10 +312,10 @@ function PatientScanQR({restapi,accountAddress,peraWallet,handleDisconnectWallet
       }
     
       <div className={`dropdown-menu ${isMenuOpen ? 'open' : ''}`}>
-        <Link to="/patient_logs">Patients dealed</Link>        
-        <Link to="/patient_qr">QR Scan</Link>
+        <Link className="button" to="/patient_logs">Request Logs</Link>        
+        <Link className="button" to="/patient_qr">QR Scan</Link>
         <hr />
-        <button onClick={handleDisconnectWalletClick}>Logout</button>
+        <button className="button" onClick={handleDisconnectWalletClick}>Logout</button>
         <div className="social-icons">
           <i className="fab fa-facebook"></i>
           <i className="fab fa-twitter"></i>

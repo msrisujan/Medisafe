@@ -17,9 +17,8 @@ const Profile = ({ accountAddress, name, dob, gender,doctorsVisited,NoofRecords,
                   <span class="green box"></span>
                 </div>
       </div>
-      <div className="profile-pic">
-        <img src="big-profile-pic.png" alt="Patient Profile" />
-      </div>
+        <i className="profile-pic fa-solid fa-user fa-2xl"></i>
+     
       <div className="profile-info">
       <p style={{overflow:"scroll"}}><b>Address:</b> {accountAddress}</p>
       <p><b>Name: </b>{name}</p>

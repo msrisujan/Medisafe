@@ -93,9 +93,13 @@ body {
   display: flex;
   padding: 40px;
   position: relative;
+  flex-wrap: wrap;
+
+  /* position: absolute; */
   pointer-events: none;
-  min-height: 300px;
+  min-height: 100px;
   color: #fff;
+  /* z-index: 100; */
 }
 
 .section-left {

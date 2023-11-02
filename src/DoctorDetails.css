@@ -1,10 +1,7 @@
-html,body{
-  background: rgb(0,0,0);
-  background: linear-gradient(298deg, rgba(0,0,0,1) 0%, rgba(0,120,135,1) 100%);
-  overflow-x: hidden;
-  overflow-y: scroll;
+.patientaccept-body {
   height: 100vh;
-  color: #fff;
+  width: 100vw;
+  overflow-x: hidden;
 }
 .doctor-details-container {
     display: flex;
@@ -55,6 +52,7 @@ html,body{
     -ms-filter: blur(8px);
     pointer-events: none;
   }
+
    
   
   table {
@@ -65,28 +63,28 @@ html,body{
   table{
       border-collapse: collapse;
       border-radius: 5px 5px 0 0;
-      border: 1px solid #ddd;
+      border: 2px solid #000;
   }
   
   th, td {
     padding: 10px;
     text-align: left;
-    border-bottom: 1px solid #ddd;
+    border-bottom: 2px solid #000;
   }
   th {
-    color: #32d7db;
+    color: #000;
   }
   
-  /* .table-row:hover {
+  .table-row:hover {
     background-color: #9de2df98;
     cursor: pointer;
-  } */
+  }
 
 
   .tablecard{
     width: 80%;
     margin: 20px;
-    background-color: #023252;
+    background-color: #32d7db;
     border-radius: 10px;
     box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
     
@@ -190,7 +188,7 @@ html,body{
    
 
 
-  .navbar-container {
+  /* .navbar-container {
     position: relative;
   }
   
@@ -223,9 +221,9 @@ html,body{
     height: 30px;
     border-radius: 50%;
     margin-right: 10px;
-  }
+  } */
   
-  .hamburger {
+  /* .hamburger {
     padding: 15px 15px;
     display: inline-block;
     cursor: pointer;
@@ -300,14 +298,14 @@ html,body{
     top: 0;
     transition: top 0.2s cubic-bezier(0.33333, 0, 0.66667, 0.33333), transform 0.13s 0.22s cubic-bezier(0.215, 0.61, 0.355, 1);
     transform: translate3d(0, 10px, 0) rotate(-45deg); 
-  }
+  } */
       
   
-  .navbar-container {
+  /* .navbar-container {
     position: relative;
-  }
+  } */
   
-  .dropdown-menu {
+  /* .dropdown-menu {
     position: absolute;
     top: 80px; 
     right: -300px;
@@ -362,4 +360,4 @@ html,body{
   }
   i {
     color: #32d7db;
-  } 
+  }  */

@@ -2,7 +2,7 @@ import React from 'react';
 import '../Profile.css'; // Import the CSS file
 
 const DoctorProfile = ({accountAddress, name, dob,specialization,experience, isBlurred }) => {
-  const profileClass = isBlurred ? 'profile-section blurred' : 'profile-section';
+  const profileClass = isBlurred ? 'profile-section ps blurred' : 'profile-section ps';
 
   return (
     <div className={profileClass}>
@@ -17,9 +17,7 @@ const DoctorProfile = ({accountAddress, name, dob,specialization,experience, isB
                   <span class="green box"></span>
                 </div>
       </div>
-      <div className="profile-pic">
-        <img src="big-profile-pic.png" alt="Dcotor Profile" />
-      </div>
+      <i className="profile-pic fa-solid fa-user fa-2xl"></i>
       <div className="profile-info">
         <p style={{overflow:"scroll"}}><b>Address:</b> {accountAddress}</p>
         <p><b>Name: </b>{name}</p>

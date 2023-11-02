@@ -43,15 +43,15 @@ const PatientNavbarProfile = ({accountAddress,restapi,loggedIn,handleDisconnectW
   if(loggedIn===true){
   return (
     
-    <div className="navbar-container">
+    <div className="navbar-container profile-body">
       
       <nav className="navbar"> {/* Use the class name directly */}
         <div className="logo">
           <img src="logo.png" alt="Medisafe Logo" />
-          <span>Medisafe</span>
+          <span className='nav-heading'>MEDISAFE</span>
         </div>
         <div className="profile">
-          <img src="profilepic.png" alt="Profile Pic" />
+          <img src="profile.png" alt="Profile Pic" />
           {/* <span>Hello, {userName}</span> */}
           <button class={hamburger_class} type="button" onClick={toggleMenu}>
             <span class="hamburger-box">
@@ -70,10 +70,10 @@ const PatientNavbarProfile = ({accountAddress,restapi,loggedIn,handleDisconnectW
         isBlurred={isBlurred} // Pass the blur state to the Profile component
       />
     <div className={`dropdown-menu ${isMenuOpen ? 'open' : ''}`}>
-        <Link to="/patient_logs">Request Logs</Link>        
-        <Link to="/patient_qr">QR Scan</Link>
+        <Link className='button' to="/patient_logs">Request Logs</Link>        
+        <Link className='button' to="/patient_qr">QR Scan</Link>
         <hr />
-        <button onClick={handleDisconnectWalletClick}>Logout</button>
+        <button className='button' onClick={handleDisconnectWalletClick}>Logout</button>
         <div className="social-icons">
           <i className="fab fa-facebook"></i>
           <i className="fab fa-twitter"></i>

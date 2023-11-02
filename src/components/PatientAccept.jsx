@@ -163,7 +163,7 @@ const PatientAccept = ({handleDisconnectWalletClick,restapi,peraWallet,accountAd
           </thead>
           <tbody>
             {data.map((row, index) => (
-              <tr className='table-row' key={index} >
+              <tr key={index} >
                 <td>{row.sno}</td>
                 <td>{row.date}</td>
                 <td>{row.doctor_name}</td>
@@ -187,33 +187,32 @@ const PatientAccept = ({handleDisconnectWalletClick,restapi,peraWallet,accountAd
   const blur_class = isBlurred ? 'blur' : '';
 
   return (
-    <div className="navbar-container">
+    <div className="navbar-container patientaccept-body">
       <nav className="navbar"> {/* Use the class name directly */}
-      <div className="logo">
-        <img src="logo.png" alt="Medisafe Logo" />
-        <span>Medisafe</span>
-      </div>
-      <div className="profile">
-        <img src="profilepic.png" alt="Profile Pic" />
-        <span>Hello, </span>
-        <button class={hamburger_class} type="button" onClick={toggleMenu}>
-          <span class="hamburger-box">
-            <span class="hamburger-inner"></span>
-          </span>
-        </button>  
-        
-      </div>
-    </nav>
+        <div className="logo">
+          <img src="logo.png" alt="Medisafe Logo" />
+          <span className='nav-heading'>MEDISAFE</span>
+        </div>
+        <div className="profile">
+          <img src="profile.png" alt="Profile Pic" />
+          {/* <span>Hello, {userName}</span> */}
+          <button class={hamburger_class} type="button" onClick={toggleMenu}>
+            <span class="hamburger-box">
+              <span class="hamburger-inner"></span>
+            </span>
+          </button>  
+        </div>
+      </nav>
     <div className='doctor-details-container'>
-      <h1 className="center-heading">Doctor Details</h1>
+      <h1 className="center-heading">Request Logs</h1>
       {renderTable()}
     </div>
       
     <div className={`dropdown-menu ${isMenuOpen ? 'open' : ''}`}>
-        <Link to="/patient_logs">Request Logs</Link>        
-        <Link to="/patient_qr">QR Scan</Link>
+        <Link className='button' to="/patient_logs">Request Logs</Link>        
+        <Link className='button' to="/patient_qr">QR Scan</Link>
         <hr />
-        <button onClick={handleDisconnectWalletClick}>Logout</button>
+        <button className='button' onClick={handleDisconnectWalletClick}>Logout</button>
         <div className="social-icons">
           <i className="fab fa-facebook"></i>
           <i className="fab fa-twitter"></i>

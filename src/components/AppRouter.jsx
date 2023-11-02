@@ -5,8 +5,8 @@ import { useEffect,useState } from 'react';
 import {PeraWalletConnect} from "@perawallet/connect"
 import Home from './Home.jsx';
 import Signup from './Signup.jsx';
-import NavbarProfile from './NavbarProfile.jsx';
 import PatientNavbarProfile from './PatientNavbarProfile.jsx';
+import NavbarProfile from './NavbarProfile.jsx';
 import ScanQR from './ScanQR.jsx';
 import DoctorAccess from './DoctorAccess.jsx';
 import PatientAccept from './PatientAccept.jsx';

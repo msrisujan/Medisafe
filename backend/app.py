@@ -11,7 +11,7 @@ import base64
 import datetime
 import mysql.connector
 from mysql.connector import errors
-import qrcode,pickle
+import pickle
 # import segno
 import requests,hashlib
 

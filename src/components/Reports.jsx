@@ -184,3 +184,36 @@ const DoctorDetails = () => {
 };
 
 export default DoctorDetails;
+
+
+
+
+// {
+//   // if length of data is greater than 0 then show the data
+//   Object.keys(data).length > 0 ? (
+//     <div className="patient-details">
+//       <div className="patient-info">
+//         <p>name: {data.patient_details.name}</p>
+//         <p>dob: {data.patient_details.DOB}</p>
+//         <p>role: {data.patient_details.role}</p>
+//         <p>address: {data.user_add}</p>
+//       </div>
+//       {
+//       requestAccess ? (
+//         <div className="request-access">
+//             <select id='request_type'>
+//             <option value="1">Normal Access</option>
+//             <option value="2">Emergency Access</option>
+//             </select>
+//             <textarea id='data' placeholder="Enter your note"></textarea>
+//             <button id='request_btn' onClick={handleRequestAccess}>Request Access</button>
+//         </div>
+//       ) : (
+//         <div>{err}</div>
+//       )
+//       }
+//     </div>
+//   ) : (
+//     <div></div>
+//   )
+// }
