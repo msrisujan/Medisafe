@@ -1,4 +1,5 @@
-from flask import Flask, request,session,render_template
+from flask import Flask,request,session,render_template
+from flask.sessions import SecureCookieSessionInterface
 from algosdk.v2client import algod,indexer
 from algosdk import account, mnemonic, encoding
 from algosdk import util,transaction,error
@@ -35,6 +36,17 @@ DB_PASSWORD=''
 DB_HOST='localhost'
 #################################
 
+
+app = Flask(__name__)
+app.secret_key = 'algo-project'
+CORS(app,supports_credentials=True)
+
+@app.after_request
+def set_samesite_cookie(response):
+    session_cookie = SecureCookieSessionInterface().get_signing_serializer(app)
+    same_cookie = session_cookie.dumps(dict(session))
+    response.headers.add("Set-Cookie", f"session={same_cookie}; Secure; HttpOnly; SameSite=None; Path=/;")
+    return response
 
 def decodeB64(str:str) -> str:
     return base64.b64decode(str).decode()
@@ -73,8 +85,6 @@ def get_time_left(date_string):
     return remaining_time_str
 
 
-
-
 indexer_client = indexer.IndexerClient(TOKEN,INDEXER_ENDPOINT, HEADERS)
 
 
@@ -95,10 +105,6 @@ class User():
             if res['apps-local-states'][0]['id']==APP_ID:
                 return True
         return False
-    
-    
-
-
     
     def retrive_local_state(self)-> None:
         if(self.is_opted):
@@ -249,31 +255,11 @@ class User():
                 return json
         return []
 
-
-                    
-                
-
-
-
     def get_request_log(self):
         if self.retrive_local_state()!=None:
             if(self.local_state['role']=='DOCTOR'):
                 pass
-                
-                    
-
-                    
-        
-                
-
-
-
-
-app = Flask(__name__)
-app.secret_key = 'algo-project'
-CORS(app,supports_credentials=True)
-
-
+    
 
 @app.route('/login',methods=['POST'])
 def login():
@@ -346,7 +332,6 @@ def get_scan_details():
                                     if(len(checkss)==0):
                                         is_pending=True
                         return json.dumps({"statusCode":200,"data":{"user_add":scan_user.user_add,"is_opted":scan_user.is_opted,"is_having_access":is_having_access,"is_having_emergency":is_having_emergency,"is_pending":is_pending,"patient_details":scan_user.retrive_local_state()}})
-
                     else:
                         return json.dumps({"statusCode":403,"notify":"Can't Access Doctor Profile.!!"})
                 else:
@@ -366,7 +351,7 @@ def get_scan_details():
                             if not is_having_emergency:
                                 return json.dumps({"statusCode":200,"data":{"user_add":scan_user.user_add,"is_opted":scan_user.is_opted,"is_having_access":is_having_access,"is_having_emergency_access":is_having_emergency,"doctor_details":scan_user.retrive_local_state(),"doctor_records":scan_user.get_doctor_history(user.user_add)}})
                             else:
-                                return json.dumps({"statusCode":200,"data":{"user_add":scan_user.user_add,"is_opted":scan_user.is_opted,"is_having_access":is_having_access,"is_having_emergency_access":is_having_emergency,"doctor_records":scan_user.get_doctor_history(user.user_add),"doctor_detailes":scan_user.retrive_local_state()}})
+                                return json.dumps({"statusCode":200,"data":{"user_add":scan_user.user_add,"is_opted":scan_user.is_opted,"is_having_access":is_having_access,"is_having_emergency_access":is_having_emergency,"doctor_records":scan_user.get_doctor_history(user.user_add),"doctor_details":scan_user.retrive_local_state()}})
                         else:
                             return json.dumps({"statusCode":200,"data":{"user_add":scan_user.user_add,"is_opted":scan_user.is_opted,"is_having_access":is_having_access,"is_having_emergency_access":is_having_emergency,"doctor_records":scan_user.get_doctor_history(user.user_add),"doctor_details":scan_user.retrive_local_state()}})
                     else:
