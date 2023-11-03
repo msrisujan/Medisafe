@@ -1,39 +1,26 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState,useEffect } from 'react';
+import { Link,Navigate } from 'react-router-dom';
 import '../DoctorDetails.css';
 
-const PatientReports = (handleDisconnectWalletClick) => {
+const PatientReports = ({restapi,handleDisconnectWalletClick}) => {
   const [selectedRow, setSelectedRow] = useState(null);
-  const data = [
-    // Replace this with your data for 10 rows
-    {
-      date: 'Date 1',
-      hospitalName: 'Hospital 1',
-      problem: 'Problem 1',
-      doctorName: 'Doctor 1',
-      doctordetails: {
-        name: 'Dr. John Doe',
-        age: 35,
-        qualification: 'MD, Cardiology',
-        experience: '10 years',
-        rating: 4.5,
-      },
-    },
-    {
-      date: 'Date 2',
-      hospitalName: 'Hospital 2',
-      problem: 'Problem 2',
-      doctorName: 'Doctor 2',
-      doctordetails: {
-        name: 'Dr. Jane Smith',
-        age: 40,
-        qualification: 'MD, Pediatrics',
-        experience: '12 years',
-        rating: 4.8,
-      },
-    },
-    // Add more rows here
-  ];
+  const [data, setData] = useState([]);
+  useEffect(() => {
+    async function sendRequest() {
+      try {
+        const response = await restapi.get("/patient_access");
+        const responseData = response.data;
+        if (responseData.statusCode === 200) {
+          setData(responseData.data);
+        } else {
+          <Navigate to="/" />;
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    }
+    sendRequest();
+  }, []);
 
   const handleRowClick = (index) => {
     setSelectedRow(index);
@@ -86,7 +73,7 @@ const PatientReports = (handleDisconnectWalletClick) => {
           <div className='hide table'>
 
           </div>
-          <div className="left-card">
+          <div className="left-card card">
             <div class="tools">
               <div class="circle">
                 <span class="red box"></span>
@@ -102,13 +89,17 @@ const PatientReports = (handleDisconnectWalletClick) => {
             <h2>Row Details</h2>
             <h4>Prescription</h4>
             <p>{selectedData.patient_prescription}</p>
+            <h4>Date</h4>
+            <p>{selectedData.date}</p>
+            <h4>Attachment</h4>
+             {(selectedData.patient_attachments==="")?<p>No Attachments</p>:<a href={selectedData.patient_attachments}>{selectedData.patient_attachments}</a>}
             <a href={`${selectedData.patient_attachments}`}>Attachments</a>
-            <button onClick={handleBackClick} className="back-button button">
+            <button onClick={handleBackClick} className="back-button button1">
               Back to Table
             </button>
             </div>
           </div>
-          <div className="right-card">
+          <div className="right-card card">
             <div class="tools">
                 <div class="circle">
                   <span class="red box"></span>
@@ -123,11 +114,9 @@ const PatientReports = (handleDisconnectWalletClick) => {
             <div className='details'>
             <h2>Doctor Details</h2>
             <p>Name: {doctordetails.name}</p>
-            <p>Qualification: {doctordetails.qualification}</p>
-            <p>Specialisation: {doctordetails.specialisation}</p>
-            <p>Experience: {doctordetails.experience}</p>
-            <p>Rating: {doctordetails.rating}</p>
-            <button>Rate</button>
+            <p>DOB: {doctordetails.DOB}</p>
+            <p>Specialisation: Cardiology</p>
+            <p>Experience: 6 Years</p>
             </div>
           </div>
         </div>
@@ -162,7 +151,7 @@ const PatientReports = (handleDisconnectWalletClick) => {
         </div>
       </nav>
     <div className='doctor-details-container'>
-      <h1 className="center-heading">Doctor Details</h1>
+      <h1 className="center-heading">Past Reports</h1>
       {renderTable()}
     </div>
       

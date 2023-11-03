@@ -178,6 +178,21 @@ class User():
                     except errors.IntegrityError as e:
                         return False
         return False
+    
+    def generate_data_hash(self,access_hash,access_status):
+        if self.retrive_local_state()!=None:
+            if(self.local_state['role']=='PATIENT'):
+                q="SELECT * FROM data_log WHERE current_hash='{}' AND patient_add='{}'".format(request_hash,self.user_add)
+                con = mysql.connector.connect(host=DB_HOST , user=DB_USER, password=DB_PASSWORD, database=DB_NAME)
+                cursor = con.cursor(buffered=False, dictionary=True)
+                cursor.execute(q)
+                rows=cursor.fetchall()
+                if len(rows)>0:
+                    row=rows[0]
+                    time_stamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                    tup = tuple([self.user_add,row['doctor_add'],access_status,time_stamp,request_hash,self.local_state['reserved_local_valueaccess_hash']])
+                    return {"patient_add":self.user_add,"doctor_add":row['doctor_add'],"access_status":access_status,"time_stamp":time_stamp,"request_hash":request_hash,"previous_hash":self.local_state['reserved_local_valueaccess_hash'],"current_hash":hashTuple(tup)}
+        return None
 
     
     def get_patient_history(self):
@@ -195,8 +210,8 @@ class User():
                     jsonrow['snum']=i
                     jsonrow['past_prescription']=row['data']
                     jsonrow['addedby']=User(row['doctor_add']).local_state['name']
-                    jsonrow['addedon']=row['time_stamp']
-                    jsonrow['attachments']=row['attachments']
+                    jsonrow['addedon']=row['time_stamp'].strftime("%Y-%m-%d %H:%M:%S")
+                    jsonrow['attachments']=row['attachments'].decode('utf-8')
                     json.append(jsonrow)
                     i+=1
                 return json
@@ -215,13 +230,13 @@ class User():
                 for row in rows:
                     jsonrow={}
                     jsonrow['snum']=i
-                    jsonrow['date']=row['time_stamp']
-                    jsonrow['doctorname']=User(row['doctor_add']).local_state['name']
+                    jsonrow['date']=row['time_stamp'].strftime("%Y-%m-%d %H:%M:%S")
+                    doctor = User(row['doctor_add'])
+                    jsonrow['doctorname']=doctor.local_state['name']
                     jsonrow['patient_prescription']=row['data']
-                    jsonrow['patient_attachments']=row['attachments']
-                    jsonrow['doctordetails'] = {}
-                    jsonrow['doctordetails']['name']=jsonrow['doctorname']
-                    if row['current_hash']=='':
+                    jsonrow['patient_attachments']=row['attachments'].decode('utf-8')
+                    jsonrow['doctordetails'] = doctor.local_state
+                    if row['current_hash']=='' or row['current_hash']=='Null':
                         jsonrow['need_approval']=True
                         jsonrow['current_hash']=hashTuple(tuple([row['patient_add'],row['doctor_add'],row['time_stamp'],row['data'],row['attachments'],row['access_hash'],row['previous_hash']]))
                     else:
@@ -312,14 +327,40 @@ def get_scan_details():
                         cursor = con.cursor(buffered=False, dictionary=True)
                         cursor.execute(q)
                         rows=cursor.fetchall()
-                        is_having_access = True if len(rows)>0 else False
+                        is_having_access = False
+                        if len(rows)>0:
+                            for row in rows:
+                                access_hash = row['current_hash']
+                                data_check_q = "SELECT * FROM data_log WHERE access_hash='{}'".format(access_hash)
+                                cursor.execute(data_check_q)
+                                data_rows=cursor.fetchall()
+                                if(len(data_rows)==0):
+                                    is_having_access=True
+                                    break
                         is_having_emergency=False
                         is_pending=False
                         if not is_having_access:
                             q="SELECT * FROM request_log WHERE patient_add='{}' AND doctor_add='{}' AND request_type=2 AND ADDDATE(time_stamp, INTERVAL 1 DAY)>'{}'".format(scan_user.user_add,user.user_add,datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
                             cursor.execute(q)
                             rows=cursor.fetchall()
-                            is_having_emergency=True if len(rows)>0 else False
+                            if len(rows)>0:
+                                for row in rows:
+                                    request_hash = row['current_hash']
+                                    access_check_q = "SELECT * FROM access_log WHERE request_hash='{}'".format(request_hash)
+                                    cursor.execute(access_check_q)
+                                    access_rows=cursor.fetchall()
+                                    if(len(access_rows)>0):
+                                        for access_row in access_rows:
+                                            if access_row['access_status']!=0:
+                                                access_hash = access_row['current_hash']
+                                                data_check_q = "SELECT * FROM data_log WHERE access_hash='{}'".format(access_hash)
+                                                cursor.execute(data_check_q)
+                                                data_rows=cursor.fetchall()
+                                                if(len(data_rows)==0):
+                                                    is_having_emergency=True
+                                                    break
+                                    else:
+                                        is_having_emergency=True
                             if not is_having_emergency:
                                 q="SELECT * FROM request_log WHERE patient_add='{}' AND doctor_add='{}' ORDER BY id DESC".format(scan_user.user_add,user.user_add)
                                 cursor.execute(q)
@@ -451,7 +492,6 @@ def doctor_access():
         i=1
 
         q="SELECT * FROM request_log WHERE doctor_add='{}' ORDER BY id DESC".format(doctor.user_add)
-        print(q)
         cursor.execute(q)
         rows=cursor.fetchall()
         for row in rows:
@@ -474,21 +514,25 @@ def doctor_access():
                     if(len(r1)>0):
                         js['request_access']='completed'
                         js['access_endson']='-'
+                        js['writeable']='no'
                     else:
                         if r[0]['access_status']==0:
                             js['request_access']='rejected'
                             js['access_endson']='-'
+                            js['writeable']='no'
                         elif r[0]['access_status']==1 and get_time_left(r[0]['time_stamp'])!='-':
                             js['request_access']='active'
                             js['access_hash']=r[0]['current_hash']
                             js['access_endson']=get_time_left(r[0]['time_stamp'])
+                            js['writeable']='yes'
                         else:
-                            print(r[0]['time_stamp'])
                             js['request_access']='expired'
                             js['access_endson']='-'
+                            js['writeable']='no'
                 else:
                     js['request_access']='pending'
                     js['access_endson']='-'
+                    js['writeable']='no'
             else:
                 q="SELECT * FROM access_log WHERE doctor_add='{}' AND request_hash='{}'".format(doctor.user_add,row['current_hash'])
                 cursor.execute(q)
@@ -500,29 +544,36 @@ def doctor_access():
                     if(len(r1)>0):
                         js['request_access']='completed'
                         js['access_endson']='-'
+                        js['writeable']='no'
                     else:
                         if r[0]['access_status']==0:
                             js['request_access']='rejected'
                             js['access_endson']='-'
+                            js['writeable']='no'
                         elif r[0]['access_status']==1 and get_time_left(r[0]['time_stamp'])!='-':
                             js['request_access']='active'
+                            js['access_hash']=r[0]['current_hash']
                             js['access_endson']=get_time_left(r[0]['time_stamp'])
+                            js['writeable']='yes'
                         else:
                             js['request_access']='expired'
                             js['access_endson']='-'
+                            js['writeable']='no'
                 elif get_time_left(row['time_stamp'])!='-':
                     js['request_access']='active'
-                    js['access_endson']=get_time_left(r[0]['time_stamp'])
+                    js['access_endson']=get_time_left(row['time_stamp'])
+                    js['writeable']='no'
                 else:
                     js['request_access']='expired'
                     js['access_endson']='-'
-            print(js)
+                    js['writeable']='no'
             if js['request_access']=='active':
                 js['patient_history']=patient.get_patient_history()
             else:
                 js['patient_history']=[]
             i+=1
             json_data.append(js)
+        print(json_data)
         return json.dumps({"statusCode":200,"data":json_data})
     else:
         return json.dumps({"statusCode":302,"href":"/login","notify":"Login To Continue.!!"})
@@ -563,6 +614,7 @@ def patient_access():
         patient = pickle.loads(session.get('user'))
         if patient.local_state['role']=='PATIENT':
             jsonn=patient.get_patient_data()
+            print(jsonn)
             return json.dumps({"statusCode":200,'data':jsonn})
         else:
             return json.dumps({"statusCode":403,"notify":"Unauthorized Access"})

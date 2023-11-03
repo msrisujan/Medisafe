@@ -137,7 +137,7 @@ const [accountAddress, setAccountAddress] = useState(null);
               <Route path="/doctor_access" element={<DoctorAccess restapi={restapi} handleDisconnectWalletClick={handleDisconnectWalletClick}/>} />
               <Route path="/patient_logs" element={<PatientAccept peraWallet={peraWallet} accountAddress={accountAddress} restapi={restapi} handleConnectWalletClick={handleDisconnectWalletClick}/>}/>
               <Route path="/patient_add" element={<PatientAdd handleDisconnectWalletClick={handleDisconnectWalletClick} />} />
-              <Route path="/patient_reports" element={<PatientReports handleDisconnectWalletClick={handleDisconnectWalletClick} />} />
+              <Route path="/patient_reports" element={<PatientReports restapi={restapi} handleDisconnectWalletClick={handleDisconnectWalletClick} />} />
               <Route path="/patient_contacts" element={<PatientContacts handleDisconnectWalletClick={handleDisconnectWalletClick} />} />
           </Routes>
         </Router>
