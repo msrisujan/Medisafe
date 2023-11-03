@@ -86,7 +86,7 @@ const PatientReports = ({restapi,handleDisconnectWalletClick}) => {
               </div>
             </div>
             <div className='details'>
-            <h2>Row Details</h2>
+            <h2 className='h2'>Row Details</h2>
             <h4>Prescription</h4>
             <p>{selectedData.patient_prescription}</p>
             <h4>Date</h4>
@@ -112,7 +112,7 @@ const PatientReports = ({restapi,handleDisconnectWalletClick}) => {
                 </div>
               </div>
             <div className='details'>
-            <h2>Doctor Details</h2>
+            <h2 className='h2'>Doctor Details</h2>
             <p>Name: {doctordetails.name}</p>
             <p>DOB: {doctordetails.DOB}</p>
             <p>Specialisation: Cardiology</p>
@@ -141,7 +141,9 @@ const PatientReports = ({restapi,handleDisconnectWalletClick}) => {
           <span className='nav-heading'>MEDISAFE</span>
         </div>
         <div className="profile">
-          <img src="profile.png" alt="Profile Pic" />
+          <a href="/patientprofile">
+            <img src="profile.png" alt="Profile Pic" />
+          </a>
           {/* <span>Hello, {userName}</span> */}
           <button class={hamburger_class} type="button" onClick={toggleMenu}>
             <span class="hamburger-box">

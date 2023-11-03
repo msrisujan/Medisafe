@@ -40,7 +40,9 @@ function PatientContacts(handleDisconnectWalletClick) {
           <span className='nav-heading'>MEDISAFE</span>
         </div>
         <div className="profile">
-          <img src="profile.png" alt="Profile Pic" />
+          <a href="/patientprofile">
+            <img src="profile.png" alt="Profile Pic" />
+          </a>
           {/* <span>Hello, {userName}</span> */}
           <button class={hamburger_class} type="button" onClick={toggleMenu}>
             <span class="hamburger-box">
@@ -72,7 +74,7 @@ function PatientContacts(handleDisconnectWalletClick) {
         </thead>
         <tbody>
           {data.map((row, index) => (
-            <tr className='table-row' key={index}>
+            <tr key={index}>
               <td>{row.name}</td>
               <td>{row.relation}</td>
               <td>{row.phone}</td>

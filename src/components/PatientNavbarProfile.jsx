@@ -51,7 +51,9 @@ const PatientNavbarProfile = ({accountAddress,restapi,loggedIn,handleDisconnectW
           <span className='nav-heading'>MEDISAFE</span>
         </div>
         <div className="profile">
-          <img src="profile.png" alt="Profile Pic" />
+          <a href="/patientprofile">
+            <img src="profile.png" alt="Profile Pic" />
+          </a>
           {/* <span>Hello, {userName}</span> */}
           <button class={hamburger_class} type="button" onClick={toggleMenu}>
             <span class="hamburger-box">
@@ -71,7 +73,10 @@ const PatientNavbarProfile = ({accountAddress,restapi,loggedIn,handleDisconnectW
       />
     <div className={`dropdown-menu ${isMenuOpen ? 'open' : ''}`}>
         <div className='dropdown-box'>
-          <Link className='button' to="/patient_logs">Request Logs</Link>        
+          <Link className='button' to="/patient_logs">Request Logs</Link>
+          <Link className='button' to="/patient_contacts">Contacts</Link>
+          <Link className='button' to="/patient_reports">Reports</Link>
+          <Link className='button' to="/patient_add">Add Data</Link> 
           <Link className='button' to="/patient_qr">QR Scan</Link>
         </div>
         <div className='dropdown-box'>
