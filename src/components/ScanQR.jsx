@@ -11,10 +11,11 @@ import { Buffer } from 'buffer';
 
 function ScanQR({restapi,accountAddress,peraWallet,handleDisconnectWalletClick}) {
     const [showCamera, setShowCamera] = useState(false);
-    const toggleCamera = () => {
+    const toggleCamera = async () => {
         setShowCamera(!showCamera);
-        if(showCamera == false){
-          closeCamera();
+        if(showCamera == true){
+          console.log('camera closed');
+          await closeCamera();
         }
       };
     const [qrscan, setQrscan] = useState(' ');
@@ -175,8 +176,10 @@ function ScanQR({restapi,accountAddress,peraWallet,handleDisconnectWalletClick})
         setShowQrCard(true);
       };
       async function closeCamera() {
+        console.log('in close');
         const stream = await navigator.mediaDevices.getUserMedia({ audio: false, video: true });
         stream.getTracks().forEach(function(track) {
+          console.log('tra');
           track.stop();
           track.enabled = false;
         });
@@ -219,7 +222,7 @@ function ScanQR({restapi,accountAddress,peraWallet,handleDisconnectWalletClick})
                         }
                         else if ( responseData.statusCode === 200 ) {
                           setData(responseData.data);
-                          closeCamera();
+                          await closeCamera();
                           
                 
                           if(responseData.data.is_having_access === true){
