@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import '../Contacts.css';
 
-function Contacts() {
+function PatientContacts(handleDisconnectWalletClick) {
   const [data, setData] = useState([
     { name: 'John Doe', relation: 'Friend', phone: '123-456-7890' },
     { name: 'Jane Smith', relation: 'Family', phone: '987-654-3210' },
@@ -32,23 +33,22 @@ function Contacts() {
   const blur_class = isBlurred ? 'blur' : ''
 
   return (
-    <div className='navbar-container'>
-            <nav className="navbar">
+    <div className='navbar-container profile-body'>
+        <nav className="navbar"> {/* Use the class name directly */}
         <div className="logo">
-            <img src="logo.png" alt="Medisafe Logo" />
-            <span>Medisafe</span>
+          <img src="logo.png" alt="Medisafe Logo" />
+          <span className='nav-heading'>MEDISAFE</span>
         </div>
         <div className="profile">
-            <img src="profilepic.png" alt="Profile Pic" />
-            <span>Hello, </span>
-            <button class={hamburger_class} type="button" onClick={toggleMenu}>
+          <img src="profile.png" alt="Profile Pic" />
+          {/* <span>Hello, {userName}</span> */}
+          <button class={hamburger_class} type="button" onClick={toggleMenu}>
             <span class="hamburger-box">
-                <span class="hamburger-inner"></span>
+              <span class="hamburger-inner"></span>
             </span>
-            </button>  
-            
+          </button>  
         </div>
-        </nav>
+      </nav>
         <div className='contacts-container'>
         <div className={`tablecard ${blur_class}`}>
            <div class="tools">
@@ -118,20 +118,25 @@ function Contacts() {
       )}
       </div>
       <div className={`dropdown-menu ${isMenuOpen ? 'open' : ''}`}>
-        <button>Doctors dealed</button>
-        <button>Recent reports</button>
-        <button>Add extra data</button>
-        <button>Edit contacts</button>
+        <div className='dropdown-box'>
+          <Link className='button' to="/patient_logs">Request Logs</Link>
+          <Link className='button' to="/patient_contacts">Contacts</Link>
+          <Link className='button' to="/patient_reports">Reports</Link>
+          <Link className='button' to="/patient_add">Add Data</Link> 
+          <Link className='button' to="/patient_qr">QR Scan</Link>
+        </div>
+        <div className='dropdown-box'>
         <hr />
-        <button>Logout</button>
+        <button className='button' onClick={handleDisconnectWalletClick}>Logout</button>
         <div className="social-icons">
           <i className="fab fa-facebook"></i>
           <i className="fab fa-twitter"></i>
           <i className="fab fa-instagram"></i>
+        </div>
         </div>
       </div>
     </div>
   );
 }
 
-export default Contacts;
+export default PatientContacts;

@@ -122,7 +122,7 @@ const DoctorAccess = ({restapi,handleDisconnectWalletClick}) => {
           <div className='hide table'>
 
           </div>
-          <div className="left-card">
+          <div className="left-card card">
             <div class="tools">
               <div class="circle">
                 <span class="red box"></span>
@@ -136,17 +136,17 @@ const DoctorAccess = ({restapi,handleDisconnectWalletClick}) => {
             </div>
             <div className='details'>
             <h2>Row Details</h2>
-            <p>SNum: {selectedData.sno}</p>
-            <p>Patient Name: {selectedData.patient_name}</p>
-            <p>Patient DOB: {selectedData.patient_dob}</p>
-            <p>Access Type: {selectedData.access_type}</p>
-            <p>Access Ends In: {selectedData.access_endson}</p>
-            <button onClick={handleBackClick} className="back-button button">
+            <p><b>SNum:</b> {selectedData.sno}</p>
+            <p><b>Patient Name:</b> {selectedData.patient_name}</p>
+            <p><b>Patient DOB:</b> {selectedData.patient_dob}</p>
+            <p><b>Access Type:</b> {selectedData.access_type}</p>
+            <p><b>Access Ends In:</b> {selectedData.access_endson}</p>
+            <button onClick={handleBackClick} className="back-button button1">
               Back to Table
             </button>
             </div>
           </div>
-          <div className="right-card">
+          <div className="right-card card">
             <div class="tools">
                 <div class="circle">
                   <span class="red box"></span>
@@ -162,7 +162,7 @@ const DoctorAccess = ({restapi,handleDisconnectWalletClick}) => {
               <h2>Doctor Details</h2>
               <textarea name="data" id="area" cols="30" rows="10"></textarea>
               <input type="file" />
-              <button onClick={submitData}>Submit</button>
+              <button onClick={submitData} className='button1 back-button'>Submit</button>
             </div>
           </div>
         </div>
@@ -242,14 +242,18 @@ const DoctorAccess = ({restapi,handleDisconnectWalletClick}) => {
     </div>
       
     <div className={`dropdown-menu ${isMenuOpen ? 'open' : ''}`}>
-        <Link className='button' to="/doctor_access">Patients dealed</Link>        
-        <Link className='button' to="/profile_qr">QR Scan</Link>
+        <div className="dropdown-box">
+        <Link className="button" to="/doctor_access">Patients dealed</Link>        
+        <Link className="button" to="/profile_qr">QR Scan</Link>
+        </div>
+        <div className="dropdown-box">
         <hr />
-        <button className='button' onClick={handleDisconnectWalletClick}>Logout</button>
+        <button className="button" onClick={handleDisconnectWalletClick}>Logout</button>
         <div className="social-icons">
           <i className="fab fa-facebook"></i>
           <i className="fab fa-twitter"></i>
           <i className="fab fa-instagram"></i>
+        </div>
         </div>
       </div>
     </div>

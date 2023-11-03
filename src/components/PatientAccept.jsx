@@ -168,7 +168,7 @@ const PatientAccept = ({handleDisconnectWalletClick,restapi,peraWallet,accountAd
                 <td>{row.date}</td>
                 <td>{row.doctor_name}</td>
                 <td>{row.note}</td>
-                <td>{row.access_status==-1?<><button onClick={()=>handleButtonClick(index,1)} className='button'>Accept</button><button onClick={()=>handleButtonClick(index,0)} className='button'>Decline</button></>:(row.access_status===1)?'Access Given on '+row.access_given_on:'Access Declined on '+row.access_given_on}</td>
+                <td>{row.access_status==-1?<><button onClick={()=>handleButtonClick(index,1)} className='button1'>Accept</button><span> </span><button onClick={()=>handleButtonClick(index,0)} className='button1'>Decline</button></>:(row.access_status===1)?'Access Given on '+row.access_given_on:'Access Declined on '+row.access_given_on}</td>
               </tr>
             ))}
           </tbody>
@@ -209,14 +209,21 @@ const PatientAccept = ({handleDisconnectWalletClick,restapi,peraWallet,accountAd
     </div>
       
     <div className={`dropdown-menu ${isMenuOpen ? 'open' : ''}`}>
-        <Link className='button' to="/patient_logs">Request Logs</Link>        
-        <Link className='button' to="/patient_qr">QR Scan</Link>
+        <div className='dropdown-box'>
+          <Link className='button' to="/patient_logs">Request Logs</Link>
+          <Link className='button' to="/patient_contacts">Contacts</Link>
+          <Link className='button' to="/patient_reports">Reports</Link>
+          <Link className='button' to="/patient_add">Add Data</Link> 
+          <Link className='button' to="/patient_qr">QR Scan</Link>
+        </div>
+        <div className='dropdown-box'>
         <hr />
         <button className='button' onClick={handleDisconnectWalletClick}>Logout</button>
         <div className="social-icons">
           <i className="fab fa-facebook"></i>
           <i className="fab fa-twitter"></i>
           <i className="fab fa-instagram"></i>
+        </div>
         </div>
       </div>
     </div>

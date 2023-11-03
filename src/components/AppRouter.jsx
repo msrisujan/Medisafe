@@ -12,6 +12,9 @@ import DoctorAccess from './DoctorAccess.jsx';
 import PatientAccept from './PatientAccept.jsx';
 import { Navigate } from 'react-router-dom';
 import PatientScanQR from './PatientScanQR.jsx';
+import PatientAdd from './Patientadd.jsx';
+import PatientReports from './PatientReports.jsx';
+import PatientContacts from './PatientContacts.jsx';
 import axios from 'axios';
 
 
@@ -133,6 +136,9 @@ const [accountAddress, setAccountAddress] = useState(null);
               <Route path="/patient_qr" element={<PatientScanQR restapi={restapi} loggedIn={loggedIn} peraWallet={peraWallet} accountAddress={accountAddress} handleDisconnectWalletClick={handleDisconnectWalletClick} />} />
               <Route path="/doctor_access" element={<DoctorAccess restapi={restapi} handleDisconnectWalletClick={handleDisconnectWalletClick}/>} />
               <Route path="/patient_logs" element={<PatientAccept peraWallet={peraWallet} accountAddress={accountAddress} restapi={restapi} handleConnectWalletClick={handleDisconnectWalletClick}/>}/>
+              <Route path="/patient_add" element={<PatientAdd handleDisconnectWalletClick={handleDisconnectWalletClick} />} />
+              <Route path="/patient_reports" element={<PatientReports handleDisconnectWalletClick={handleDisconnectWalletClick} />} />
+              <Route path="/patient_contacts" element={<PatientContacts handleDisconnectWalletClick={handleDisconnectWalletClick} />} />
           </Routes>
         </Router>
   );

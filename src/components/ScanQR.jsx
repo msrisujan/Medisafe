@@ -188,7 +188,7 @@ function ScanQR({restapi,accountAddress,peraWallet,handleDisconnectWalletClick})
       const scanResult = () => {
         if(showQrCard){
           return (
-            <div className={`card ${blur_class}`}>
+            <div className={`card Qrcard ${blur_class}`}>
             <div class="tools">
                 <div class="circle">
                   <span class="red box"></span>
@@ -271,18 +271,23 @@ function ScanQR({restapi,accountAddress,peraWallet,handleDisconnectWalletClick})
           </div>
         ) : (
             <div className="user-info">
+              <div className="qr">
             <QRCodeSVG
                 value={`${accountAddress}`}
                 bgColor = {"#fff"}
                 fgColor = {"#000"}
                 />
+                </div>
                 <p>Username: {name}</p>
                 <p>Role: {role}</p>
             </div>
-        )}                 
+        )}
+        <div className="back-button">
         <button onClick={toggleCamera} className="button1">
           {showCamera ? 'Show QR' : 'Scan QR'}
-        </button>  
+        </button> 
+        </div>                
+         
       </div>
           );
         }
@@ -302,26 +307,32 @@ function ScanQR({restapi,accountAddress,peraWallet,handleDisconnectWalletClick})
               </div>
             <div className="patient-details">
             <div className="patient-info">
-              <p>name: {data.patient_details.name}</p>
-              <p>dob: {data.patient_details.DOB}</p>
-              <p>role: {data.patient_details.role}</p>
-              <p>address: {data.user_add}</p>
+              <p><b>Name:</b> {data.patient_details.name}</p>
+              <p><b>Dob:</b> {data.patient_details.DOB}</p>
+              <p><b>Role:</b> {data.patient_details.role}</p>
+              <p style={{overflow:"scroll"}}><b>Address:</b>{data.user_add}</p>
             </div>
             {
             requestAccess ? (
               <div className="request-access">
-                  <select id='request_type'>
-                  <option value="1">Normal Access</option>
-                  <option value="2">Emergency Access</option>
-                  </select>
-                  <textarea id='data' placeholder="Enter your note"></textarea>
-                  <button id='request_btn' onClick={handleRequestAccess}>Request Access</button>
+                  <textarea rows={7} id='data' placeholder="Enter your note"></textarea>
+                  <div className="select-button-container">
+                    <div className="select">
+                    <select id='request_type'>
+                      <option value="1">Normal Access</option>
+                      <option value="2">Emergency Access</option>
+                    </select>
+                    </div>
+                    <button className="button1 request-button" id="request_btn" onClick={handleRequestAccess}>Request Access</button>
+                  </div>
               </div>
             ) : (
               <div>{err}</div>
             )
             }
-            <button className="button1" onClick={handleBackClick}>Back</button>
+            <div className="back-button">
+              <button className="button1 back" onClick={handleBackClick}>Back</button>
+            </div>     
           </div>
           </div>
           );
@@ -350,14 +361,18 @@ function ScanQR({restapi,accountAddress,peraWallet,handleDisconnectWalletClick})
       
     
       <div className={`dropdown-menu ${isMenuOpen ? 'open' : ''}`}>
+        <div className="dropdown-box">
         <Link className="button" to="/doctor_access">Patients dealed</Link>        
         <Link className="button" to="/profile_qr">QR Scan</Link>
+        </div>
+        <div className="dropdown-box">
         <hr />
         <button className="button" onClick={handleDisconnectWalletClick}>Logout</button>
         <div className="social-icons">
           <i className="fab fa-facebook"></i>
           <i className="fab fa-twitter"></i>
           <i className="fab fa-instagram"></i>
+        </div>
         </div>
       </div>
       </div>

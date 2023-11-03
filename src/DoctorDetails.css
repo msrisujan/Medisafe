@@ -7,7 +7,7 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    margin-top: 20px;
+    margin-top: 6%;
   }
   
   .center-heading {
@@ -53,7 +53,14 @@
     pointer-events: none;
   }
 
-   
+   h2{
+    color: #000;
+   }
+  
+   button.file-button{
+    color: #fff;
+    background-color: #000;
+   }
   
   table {
     width: 95%;
@@ -70,6 +77,7 @@
     padding: 10px;
     text-align: left;
     border-bottom: 2px solid #000;
+    color: #000;
   }
   th {
     color: #000;
@@ -101,7 +109,7 @@
     margin-top: 20px;
   }
   
-  .left-card, .right-card {
+  /* .left-card, .right-card {
     width: 38%;
     padding: 20px;
     margin: 20px;
@@ -109,14 +117,16 @@
     border-radius: 10px;
     box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
     transition: all 0.3s ease;
-  }
+  } */
 
   .details{
     padding-left: 50px;
+    color: #000;
   }
   
   .left-card {
     animation: appear 0.5s ease-in-out;
+    margin-right: 100px;
   }
   
   .right-card {

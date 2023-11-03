@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import '../DoctorDetails.css';
 
-const DoctorDetails = () => {
+const PatientReports = (handleDisconnectWalletClick) => {
   const [selectedRow, setSelectedRow] = useState(null);
   const data = [
     // Replace this with your data for 10 rows
@@ -144,46 +145,50 @@ const DoctorDetails = () => {
   const blur_class = isBlurred ? 'blur' : '';
 
   return (
-    <div className="navbar-container">
+    <div className="navbar-container profile-body">
       <nav className="navbar"> {/* Use the class name directly */}
-      <div className="logo">
-        <img src="logo.png" alt="Medisafe Logo" />
-        <span>Medisafe</span>
-      </div>
-      <div className="profile">
-        <img src="profilepic.png" alt="Profile Pic" />
-        <span>Hello, </span>
-        <button class={hamburger_class} type="button" onClick={toggleMenu}>
-          <span class="hamburger-box">
-            <span class="hamburger-inner"></span>
-          </span>
-        </button>  
-        
-      </div>
-    </nav>
+        <div className="logo">
+          <img src="logo.png" alt="Medisafe Logo" />
+          <span className='nav-heading'>MEDISAFE</span>
+        </div>
+        <div className="profile">
+          <img src="profile.png" alt="Profile Pic" />
+          {/* <span>Hello, {userName}</span> */}
+          <button class={hamburger_class} type="button" onClick={toggleMenu}>
+            <span class="hamburger-box">
+              <span class="hamburger-inner"></span>
+            </span>
+          </button>  
+        </div>
+      </nav>
     <div className='doctor-details-container'>
       <h1 className="center-heading">Doctor Details</h1>
       {renderTable()}
     </div>
       
-      <div className={`dropdown-menu ${isMenuOpen ? 'open' : ''}`}>
-        <button>Doctors dealed</button>
-        <button>Recent reports</button>
-        <button>Add extra data</button>
-        <button>Edit contacts</button>
+    <div className={`dropdown-menu ${isMenuOpen ? 'open' : ''}`}>
+        <div className='dropdown-box'>
+          <Link className='button' to="/patient_logs">Request Logs</Link>
+          <Link className='button' to="/patient_contacts">Contacts</Link>
+          <Link className='button' to="/patient_reports">Reports</Link>
+          <Link className='button' to="/patient_add">Add Data</Link> 
+          <Link className='button' to="/patient_qr">QR Scan</Link>
+        </div>
+        <div className='dropdown-box'>
         <hr />
-        <button>Logout</button>
+        <button className='button' onClick={handleDisconnectWalletClick}>Logout</button>
         <div className="social-icons">
           <i className="fab fa-facebook"></i>
           <i className="fab fa-twitter"></i>
           <i className="fab fa-instagram"></i>
+        </div>
         </div>
       </div>
     </div>
   );
 };
 
-export default DoctorDetails;
+export default PatientReports;
 
 
 

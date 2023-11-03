@@ -9,10 +9,14 @@ import { Buffer } from 'buffer';
 
 
 
-function PatientScanQR({restapi,accountAddress,peraWallet,handleDisconnectWalletClick}) {
+function ScanQR({restapi,accountAddress,peraWallet,handleDisconnectWalletClick}) {
     const [showCamera, setShowCamera] = useState(false);
-    const toggleCamera = () => {
+    const toggleCamera = async () => {
         setShowCamera(!showCamera);
+        if(showCamera == true){
+          console.log('camera closed');
+          await closeCamera();
+        }
       };
     const [qrscan, setQrscan] = useState(' ');
 
@@ -167,24 +171,24 @@ function PatientScanQR({restapi,accountAddress,peraWallet,handleDisconnectWallet
         }
         btn.disabled=false;
       }
-    return (
-        <div className="navbar-container scan-body">
-      <nav className="navbar"> {/* Use the class name directly */}
-        <div className="logo">
-          <img src="logo.png" alt="Medisafe Logo" />
-          <span className='nav-heading'>MEDISAFE</span>
-        </div>
-        <div className="profile">
-          <img src="profile.png" alt="Profile Pic" />
-          {/* <span>Hello, {userName}</span> */}
-          <button class={hamburger_class} type="button" onClick={toggleMenu}>
-            <span class="hamburger-box">
-              <span class="hamburger-inner"></span>
-            </span>
-          </button>  
-        </div>
-      </nav>
-        <div className={`card ${blur_class}`}>
+      const [showQrCard, setShowQrCard] = useState(true);
+      const handleBackClick = () => {
+        setShowQrCard(true);
+      };
+      async function closeCamera() {
+        console.log('in close');
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: false, video: true });
+        stream.getTracks().forEach(function(track) {
+          console.log('tra');
+          track.stop();
+          track.enabled = false;
+        });
+      }
+      
+      const scanResult = () => {
+        if(showQrCard){
+          return (
+            <div className={`card Qrcard ${blur_class}`}>
             <div class="tools">
                 <div class="circle">
                   <span class="red box"></span>
@@ -218,6 +222,9 @@ function PatientScanQR({restapi,accountAddress,peraWallet,handleDisconnectWallet
                         }
                         else if ( responseData.statusCode === 200 ) {
                           setData(responseData.data);
+                          await closeCamera();
+                          
+                
                           if(responseData.data.is_having_access === true){
                             setErr('You have General access for data of this Patient, go to Patients Section for Accessing Data')
                           }
@@ -230,6 +237,7 @@ function PatientScanQR({restapi,accountAddress,peraWallet,handleDisconnectWallet
                           else{
                             setRequestAccess(true);
                           }
+                          setShowQrCard(false);
                         }
                       }
                       else if ( role === "PATIENT" ) {
@@ -264,66 +272,114 @@ function PatientScanQR({restapi,accountAddress,peraWallet,handleDisconnectWallet
         ) : (
             <div className="user-info">
               <div className="qr">
-                <QRCodeSVG
-                    value={`${accountAddress}`}
-                    bgColor = {"#fff"}
-                    fgColor = {"#000"}
+            <QRCodeSVG
+                value={`${accountAddress}`}
+                bgColor = {"#fff"}
+                fgColor = {"#000"}
                 />
-              </div>
+                </div>
                 <p>Username: {name}</p>
                 <p>Role: {role}</p>
             </div>
-        )}                 
+        )}
+        <div className="back-button">
         <button onClick={toggleCamera} className="button1">
           {showCamera ? 'Show QR' : 'Scan QR'}
-        </button>
+        </button> 
+        </div>                
+         
       </div>
-      {
-        // if length of data is greater than 0 then show the data
-        Object.keys(data).length > 0 ? (
-          <div className="patient-details">
+          );
+        }
+        else if (Object.keys(data).length > 0){
+          return (
+            <div className={`card ${blur_class}`}>
+            <div class="tools">
+                <div class="circle">
+                  <span class="red box"></span>
+                </div>
+                <div class="circle">
+                  <span class="yellow box"></span>
+                </div>
+                <div class="circle">
+                  <span class="green box"></span>
+                </div>
+              </div>
+            <div className="patient-details">
             <div className="patient-info">
-              <p>name: {data.patient_details.name}</p>
-              <p>dob: {data.patient_details.DOB}</p>
-              <p>role: {data.patient_details.role}</p>
-              <p>address: {data.user_add}</p>
+              <p><b>Name:</b> {data.patient_details.name}</p>
+              <p><b>Dob:</b> {data.patient_details.DOB}</p>
+              <p><b>Role:</b> {data.patient_details.role}</p>
+              <p style={{overflow:"scroll"}}><b>Address:</b>{data.user_add}</p>
             </div>
+            {
+            requestAccess ? (
+              <div className="request-access">
+                  <textarea rows={7} id='data' placeholder="Enter your note"></textarea>
+                  <div className="select-button-container">
+                    <div className="select">
+                    <select id='request_type'>
+                      <option value="1">Normal Access</option>
+                      <option value="2">Emergency Access</option>
+                    </select>
+                    </div>
+                    <button className="button1 request-button" id="request_btn" onClick={handleRequestAccess}>Request Access</button>
+                  </div>
+              </div>
+            ) : (
+              <div>{err}</div>
+            )
+            }
+            <div className="back-button">
+              <button className="button1 back" onClick={handleBackClick}>Back</button>
+            </div>     
           </div>
-        ) : (
-          <div></div>
-        )
-      }
-
-
-
-      {
-        requestAccess ? (
-          <div className="request-access">
-              <select id='request_type'>
-              <option value="1">Normal Access</option>
-              <option value="2">Emergency Access</option>
-              </select>
-              <textarea id='data' placeholder="Enter your note"></textarea>
-              <button id='request_btn' onClick={handleRequestAccess}>Request Access</button>
           </div>
-        ) : (
-          <div>{err}</div>
-        )
+          );
+        } else{
+          return <div></div>
       }
+    }
+    return (
+        <div className="navbar-container scan-body">
+      <nav className="navbar"> {/* Use the class name directly */}
+          <div className="logo">
+            <img src="logo.png" alt="Medisafe Logo" />
+            <span className='nav-heading'>MEDISAFE</span>
+          </div>
+          <div className="profile">
+            <img src="profile.png" alt="Profile Pic" />
+            {/* <span>Hello, {userName}</span> */}
+            <button class={hamburger_class} type="button" onClick={toggleMenu}>
+              <span class="hamburger-box">
+                <span class="hamburger-inner"></span>
+              </span>
+            </button>  
+          </div>
+        </nav>
+        {scanResult()}
+      
     
-      <div className={`dropdown-menu ${isMenuOpen ? 'open' : ''}`}>
-        <Link className="button" to="/patient_logs">Request Logs</Link>        
-        <Link className="button" to="/patient_qr">QR Scan</Link>
+        <div className={`dropdown-menu ${isMenuOpen ? 'open' : ''}`}>
+        <div className='dropdown-box'>
+          <Link className='button' to="/patient_logs">Request Logs</Link>
+          <Link className='button' to="/patient_contacts">Contacts</Link>
+          <Link className='button' to="/patient_reports">Reports</Link>
+          <Link className='button' to="/patient_add">Add Data</Link> 
+          <Link className='button' to="/patient_qr">QR Scan</Link>
+        </div>
+        <div className='dropdown-box'>
         <hr />
-        <button className="button" onClick={handleDisconnectWalletClick}>Logout</button>
+        <button className='button' onClick={handleDisconnectWalletClick}>Logout</button>
         <div className="social-icons">
           <i className="fab fa-facebook"></i>
           <i className="fab fa-twitter"></i>
           <i className="fab fa-instagram"></i>
+        </div>
         </div>
       </div>
       </div>
   );
 }
 
-export default PatientScanQR;
+export default ScanQR;

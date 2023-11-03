@@ -69,14 +69,18 @@ const NavbarProfile = ({accountAddress,restapi,loggedIn,handleDisconnectWalletCl
         isBlurred={isBlurred} // Pass the blur state to the Profile component
       />
     <div className={`dropdown-menu ${isMenuOpen ? 'open' : ''}`}>
-        <Link className='button' to="/doctor_access">Patients dealed</Link>        
-        <Link className='button' to="/profile_qr">QR Scan</Link>
+        <div className="dropdown-box">
+        <Link className="button" to="/doctor_access">Patients dealed</Link>        
+        <Link className="button" to="/profile_qr">QR Scan</Link>
+        </div>
+        <div className="dropdown-box">
         <hr />
-        <button className='button' onClick={handleDisconnectWalletClick}>Logout</button>
+        <button className="button" onClick={handleDisconnectWalletClick}>Logout</button>
         <div className="social-icons">
           <i className="fab fa-facebook"></i>
           <i className="fab fa-twitter"></i>
           <i className="fab fa-instagram"></i>
+        </div>
         </div>
       </div>
     
