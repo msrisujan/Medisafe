@@ -21,8 +21,7 @@ import axios from 'axios';
 const AppRouter = () => {
   const peraWallet = new PeraWalletConnect({
     // Default chainId is "4160"
-    chainId: "416002",
-    shouldShowSignTxnToast: false
+    // chainId:"416002"
 });
 
 
