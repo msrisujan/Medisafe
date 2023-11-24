@@ -20,7 +20,7 @@ const Profile = ({ accountAddress, name, dob, gender,doctorsVisited,NoofRecords,
         <i className="profile-pic fa-solid fa-user fa-2xl"></i>
      
       <div className="profile-info">
-      <p style={{overflow:"scroll"}}><b>Address:</b> {accountAddress}</p>
+      <p><b>Address:</b> {accountAddress}</p>
       <p><b>Name: </b>{name}</p>
         <p><b>Date of Birth:</b> {dob}</p>
         <p><b>Gender:</b> {gender}</p>
