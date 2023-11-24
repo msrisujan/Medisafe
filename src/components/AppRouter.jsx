@@ -27,7 +27,7 @@ const AppRouter = () => {
 
 
 const restapi = axios.create({
-  baseURL: 'http://127.0.0.1:5000',
+  baseURL: 'https://medisafe.pythonanywhere.com/',
   withCredentials: true
 });
 
